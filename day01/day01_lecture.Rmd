@@ -127,8 +127,8 @@ We will be learning to *program* in R
 Typical class split into four parts:
 
 1. Review: go over previous homework, answer outstanding questions
-2. Lecture: me talking, you interrupting (often, I hope!) to ask questions, building on the previous day's reading
-3. Practice: you trying something based on the lecture/readings
+2. Lecture: me talking, you interrupting (often, I hope!) to ask questions
+3. Practice: you trying something based on the lecture
 3. Follow-up (and expand): discuss what broke during the Practice, go deeper (if time allows)
 
 ## Assessment structure
@@ -185,12 +185,12 @@ Typical class split into four parts:
     
 ## Completing the Final Project
   - "Non-trivial" elements could include:
-    - Data: especially mess/big/complex data
+    - Data: especially messy/big/complex data
     - Analysis: significant programming aspect to analysis (e.g., simulation)
     - Results: tricky visualization, novel way of reporting results
     - Code: useful new functions that would be of use and interest to other people
   - Code will be delivered via GitHub (preferred) or emailed
-    - code will acccomplish what is in the proposal
+    - code will accomplish what is in the proposal
     - code will enable the instructor to completely replicate the results
 
 # Some programming basics

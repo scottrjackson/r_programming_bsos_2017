@@ -146,7 +146,7 @@ Typical class split into four parts:
 ## Completing Practice
   - the Practice component is "complete" if you complete 7/10 IN-CLASS Practices
   - de facto attendance
-  - some Practice will require code submission
+  - some Practice may require code submission
   - code submissions will only count if submitted during class
   - not graded for "correctness", only completion
   - should be automatic if you come to class

@@ -3,7 +3,7 @@
 #+EMAIL:     scottrj@umd.edu
 #+DATE:      
 #+LANGUAGE:  en
-#+OPTIONS:   H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t ':t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
 #+LATEX_CLASS: tufte-handout
 
@@ -22,7 +22,7 @@
   - Course material repository: :: [[https://github.com/scottrjackson/r_programming_bsos_winter2017]]
 
 * Description
-R@@\marginnote{\texttt{www.r-project.org}}@@ is a programming language and environment designed for statistical analysis. It is free and open-source, and it includes integration with thousands of cutting-edge packages contributed by users from around the world. It has become a /de facto/ standard and /lingua franca/ for statistical analysis.  It is an incredibly powerful tool for data analysis and visualization, and thus an indispensable tool for any kind of quantitative work in the behavioral and social sciences. However, because many (if not most) students and researchers in these fields are not otherwise trained in programming techniques, learning R can be difficult, and poor understanding of programming concepts and techniques can create problems in analysis and reporting of results. 
+R @@latex:\marginnote{\texttt{www.r-project.org}}@@ is a programming language and environment designed for statistical analysis. It is free and open-source, and it includes integration with thousands of cutting-edge packages contributed by users from around the world. It has become a /de facto/ standard and /lingua franca/ for statistical analysis.  It is an incredibly powerful tool for data analysis and visualization, and thus an indispensable tool for any kind of quantitative work in the behavioral and social sciences. However, because many (if not most) students and researchers in these fields are not otherwise trained in programming techniques, learning R can be difficult, and poor understanding of programming concepts and techniques can create problems in analysis and reporting of results. 
 
 This course aims to give you a foundation in programming, in order to facilitate future work with R.  It is not a stats course, though we will address a few topics critical to data analysis such as cleaning, formatting, and visualizing your data.  The focus of the course is building concepts, skills, and habits to make you a better programmer, in order to get the most out of R.
 * Goals
@@ -50,9 +50,7 @@ Each class is 3 hours.  This time will be divided roughly into four parts:
   3. *Practice:* You will have some in-class exercises to try, in order to immediately apply the concepts from the lecture.
   4. *Follow-up and troubleshooting:* Things will inevitably go wrong. You are very unlikely to perfectly apply the concepts the first time during practice, and I will probably forget to mention some things along the way. So we will reserve the last hour to talk about the problems you encounter in practice and solutions to those problems.  If everything goes unexpectedly smoothly, we will use this time to cover more advanced extensions of the concepts.
 * Schedule
-The class meetings will only go through the first two weeks of the Winter Term (10 meetings total). The final week of the term will not have any meetings, but you may be working on your final projects (see below) through that time, and you may arrange office hours if you would like some additional feedback or help.
-
-The following schedule is a work in progress.  Check the online version of this syllabus for the most up-to-date schedule, in case you need to miss a class but are interested in specific topics. In particular, the "special topic" days may be used as "spillover" days if we need to move more slowly or repeat any of the other topics, and if we have time for special topics, those may change based on student interest.
+The following schedule is a work in progress.  Check the online version of this syllabus for the most up-to-date schedule, in case you need to miss a class but are interested in specific topics. In particular, the "special topic" and "review" days may be used as "spillover" days if we need to move more slowly or repeat any of the other topics, and if we have time for special topics, those may change based on student interest.
 
 | Date   | Topic                                                        |
 |--------+--------------------------------------------------------------|
@@ -84,12 +82,12 @@ The grading is based on how much of these components you complete on time:
 
 What it means to "complete" each of these is described below.
 ** Practices/attendance
-\marginnote{\textbf{Required to "complete":} Seven in-class Practices}As described above, there will be one or more Practice exercises in each class. You will submit these exercises to me electronically during class, as described in class.  In order to be "complete," an individual Practice must represent a full attempt to complete the goal.  That is, you must complete some code or other activity that represents each step in the Practice, as described in the assignment.  This code does not have to actually work!  But if it does not work, you will need to add some documentation of what the problem appears to be.
+@@latex:\marginnote{\textbf{Required to "complete":} Seven in-class Practices}@@As described above, there will be one or more Practice exercises in each class. You will submit these exercises to me electronically during class, as described in class.  In order to be "complete," an individual Practice must represent a full attempt to complete the goal.  That is, you must complete some code or other activity that represents each step in the Practice, as described in the assignment.  This code does not have to actually work!  But if it does not work, you will need to add some documentation of what the problem appears to be.
 
 Requiring Practices is the method I will use to require attendance, since these can only be submitted during class.  There is no separate grade or tracking of attendance.  There is no make-up for a Practice.  The fact that you are only required to complete 7 Practices builds in flexibility if you need to miss one or more classes for any reason. 
 # If there is some constraint preventing you from being in class physically, you can arrange with me to set up a way to participate virtually (e.g., Google Hangouts), but it will still be at the same time.  You will need to arrange this with me ahead of time, and you are required to give me a reasonable justification.  
 ** Homework
-\marginnote{\textbf{Required to "complete":} Seven out-of-class Homework}Homework will be assigned with each class.  These will be submitted to me electronically before the next class.  The method of submission will be detailed in the assignment. The assignments will represent some extension or variation on the lesson and Practice of that day.  In order to complete a Homework, you must actually complete the objective for the assignment.  
+@@latex:\marginnote{\textbf{Required to "complete":} Seven out-of-class Homework}@@Homework will be assigned with each class.  These will be submitted to me electronically before the next class.  The method of submission will be detailed in the assignment. The assignments will represent some extension or variation on the lesson and Practice of that day.  In order to complete a Homework, you must actually complete the objective for the assignment.  
 
 While the Homework objectives will be the same for all students, the data, and therefore the exact solutions, will be different for each student.  The first assignment is to find a good data set to use throughout the class.  The subsequent assignments will have you explore this data set and practice the things we learn in class.  The purpose of this is to allow and encourage collaboration.  Since everyone's "answers" will be slightly different, each student will need to adapt things for their particular data set.  This closely mimics a common way to learn outside of class, namely cribbing off of other people's code, and thus is designed to set you up to continue to learn on your own.
 
@@ -99,8 +97,8 @@ Exercises are due before the beginning of the next class period, and this will b
 ** Final Project
 The final part of the course that determines your grade is the Final Project. Here are the requirements and dates:
 
-   - Submit a proposal: :: \marginnote{\textbf{Required to pass the course:} Submit proposal by Jan 15}You need to send me a brief written proposal (via email) for your project. This needs to outline how it will address the requirements (data, analysis, etc.). The deadline for this is *11:59 PM EST, Sunday, January 15*. If you do not send a proposal by this deadline, you will not count as "completing" the Final Project.
-   - Revise proposal: :: \marginnote{\textbf{Required to "complete":} Submit revised proposal (due date determined when I send you feedback)}I will look at your proposal and either approve it or send it back to you with suggestions. If I send it back, I may require a revised proposal. I will set the deadline for this revision when I send it back to you.
+   - Submit a proposal: :: @@latex:\marginnote{\textbf{Required to pass the course:} Submit proposal by Jan 15}@@ You need to send me a brief written proposal (via email) for your project. This needs to outline how it will address the requirements (data, analysis, etc.). The deadline for this is *11:59 PM EST, Sunday, January 15*. If you do not send a proposal by this deadline, you will not count as "completing" the Final Project.
+   - Revise proposal: :: @@latex:\marginnote{\textbf{Required to "complete":} Submit revised proposal (due date determined when I send you feedback)}@@I will look at your proposal and either approve it or send it back to you with suggestions. If I send it back, I may require a revised proposal. I will set the deadline for this revision when I send it back to you.
 \newpage
    - Complete the project: :: The project is a set of code completing some kind of analysis. The requirements are:
      1. Pick some data to work with
@@ -110,15 +108,11 @@ The final part of the course that determines your grade is the Final Project. He
 	3. Graphical results (like a plot)
      3. Report the analysis with appropriate documentation
      4. Some aspect of the above (data/analysis/reporting) needs to be "non-trivial," i.e., something we have not explicitly covered in class.  Examples include:
-	- Data: especially messy/big/complex data
-	  - Example: analyze a complex public data set, with code that would be helpful to other people in wrangling this data set to work with on their own
-	- Programming-dependent analysis: doing something that would be difficult/infeasible/impossible/annoying with a simple "point-and-click" program interface
-	  - Example: a simulation-based analysis requiring loops/iteration
-	- Results: tricky visualization, novel way of reporting results
-	  - Example: a cool new way to visually represent/explore data in your field
-	- Code: providing useful new function that would be of interest to other people
-	  - Example: a convenience function that people in your lab could use in analyzing data that they commonly work with
-     5. Post results and replicable code via GitHub (preferred), or email a complete zipped repository to me. This will be described fully in class. The requirement means that your code should compile/run/complete fully. If it does, and it does what you said in your proposal, then the project will be complete.  You will be able to verify that it works ahead of time, so there should be no uncertainty in whether the project "passes" or not. The due date\marginnote{\textbf{Required to pass the course:} Email or post project via GitHub by Jan 21} for the project is *8:00 PM EST, Tuesday, January 24*. Projects posted after this time will not be evaluated.
+	- Data: especially messy/big/complex data @@latex:\marginnote{\textbf{Example:} analyze a complex public data set, with code that would be helpful to other people in wrangling this data set to work with on their own}@@
+	- Programming-dependent analysis: doing something that would be difficult/infeasible/impossible/annoying with a simple "point-and-click" program interface @@latex:\marginnote{\textbf{Example:} a simulation-based analysis requiring loops/iteration}@@
+	- Results: tricky visualization, novel way of reporting results @@latex:\marginnote{\textbf{Example:} a cool new way to visually represent/explore data in your field}@@
+	- Code: providing useful new function that would be of interest to other people @@latex:\marginnote{\textbf{Example:} a convenience function that people in your lab could use in analyzing data that they commonly work with}@@
+     5. Post results and replicable code via GitHub (preferred), or email a complete zipped repository to me. This will be described fully in class. The requirement means that your code should compile/run/complete fully. If it does, and it does what you said in your proposal, then the project will be complete.  You will be able to verify that it works ahead of time, so there should be no uncertainty in whether the project "passes" or not. The due date @@latex:\marginnote{\textbf{Required to pass the course:} Email or post project via GitHub by Jan 24}@@ for the project is *8:00 PM EST, Tuesday, January 24*. Projects posted after this time will not be evaluated.
 
 A more complete set of instructions, suggestions, etc. will be made available during the first week of the course.
 * Optional reading

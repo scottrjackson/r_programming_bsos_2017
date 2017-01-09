@@ -2,7 +2,9 @@
 title: "Homework #1"
 author: "PSYC 798W, Scott Jackson"
 date: "January 9, 2017"
-output: rmarkdown::tufte_handout
+output: 
+  tufte::tufte_handout:
+          keep_tex: true
 ---
 
 # Homework #1

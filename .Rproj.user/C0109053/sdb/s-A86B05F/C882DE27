@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "---\ntitle: \"Day 3 Homework\"\noutput: html_document\n---\n\nThe goal of this homework is to get practice with manipulating data.\n\n1. Make both a \"wide\" and a \"long\" version of your data\n\n- casting with a LOT of variables\n\n```{r eval=FALSE}\n\nmydata.wide <- dcast(mydata.long, [80 columns here] ~ split)\n\ncolumns.to.keep <- colnames(mydata.long)[1:80]\ncolumns.to.keep.pasted <- paste(columns.to.keep, collapse = \" + \")\nmy.cast.formula <- as.formula(paste(columns.to.keep.pasted, \" ~ split\"))\nclass(my.cast.formula)  # \"formula\"\nmydata.wide <- dcast(mydata.long, formula = my.cast.formula)\n\n\n```\n\n2. Transform a variable\n\n\n3. Recode a factor\n\n4. Add a new factor, where the levels are conditional on the values of some other variable. E.g., a factor of \"high\", \"medium\", and \"low\" based on thresholds for another variable.\n```{r}\n\n\n\n```\n\n\n5. Reorder the levels of this new factor\n\n\n6. Choose a factor that could be re-coded as multiple dimensions (recall the sepal/petal vs. length/width breakdown). If you don't have one, try to create one.  Now create two (or more) new factors that represent these dimensions.\n\n7. Using `dcast`, aggregate some variable into \"cell means\" of some kind.\n\n8.  Save all of the above in a well-documented R Markdown document.  Email me the .Rmd file (and if you use different or updated data from Day 2 Homework, send that to me, too).\n",
+    "created" : 1483934607059.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3319620932",
+    "id" : "C882DE27",
+    "lastKnownWriteTime" : 1483932852,
+    "last_content_update" : 1483932852,
+    "path" : "~/projects/r_programming_bsos_winter2016/day03/day03_homework.Rmd",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

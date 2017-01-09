@@ -1,7 +1,7 @@
 ---
 title: "R Programming for Behavioral Science: Day 1"
 author: "PSYC 798W, Scott Jackson"
-date: 2016-01-09
+date: 2017-01-09
 output: ioslides_presentation
 ---
 
@@ -171,9 +171,9 @@ Typical class split into four parts:
     
 ## Completing the Final Project {.smaller}
   - the Final Project has several requirements:
-    - proposal due 11:59 PM EST, Sunday, January 10
-    - proposal revision (if needed) due by time specified by instructor, but no later than 11:59 PM EST, Sunday January 17
-    - final code due 11:59 PM EST, Thursday, January 21
+    - proposal due 11:59 PM EST, Sunday, January 15
+    - proposal revision (if needed) due by time specified by instructor
+    - final code due 8:00 PM EST, Tuesday, January 24
     - interesting data set (see requirements for first Homework)
   - Analysis results in one or more of:
     - numerical results
@@ -189,7 +189,7 @@ Typical class split into four parts:
     - Analysis: significant programming aspect to analysis (e.g., simulation)
     - Results: tricky visualization, novel way of reporting results
     - Code: useful new functions that would be of use and interest to other people
-  - Code will be posted to GitHub (or other agreed-on repository)
+  - Code will be delivered via GitHub (preferred) or emailed
     - code will acccomplish what is in the proposal
     - code will enable the instructor to completely replicate the results
 
@@ -261,7 +261,7 @@ Things to strive for:
     - iterative approach
     - extremely useful for data analysis
   - The R *language* is interpreted and executed by the open  -source R *software*
-  - Some other versions exist ([Revolution R](http://www.revolutionanalytics.com/), [pqR](http://www.pqr-project.org/), [Renjin](http://www.renjin.org/), etc.)
+  - Some other versions exist ([Microsoft R Open](https://mran.revolutionanalytics.com/open/), [pqR](http://www.pqr-project.org/), [Renjin](http://www.renjin.org/), etc.)
   - We will stick with "regular" R, aka GNU R
 
 ## Interfaces
@@ -280,7 +280,7 @@ Things to strive for:
     - free & open source
     - fairly flexible (can support different workstyles)
     - supports reproducibility through integration with `knitr` and version control (`git` and `SVN`)
-    - several R-specific conveniences
+    - many R-specific conveniences
     - easy to use
     - RStudio team includes several R "luminaries"
   - Cons:
@@ -302,7 +302,7 @@ Things to strive for:
        
 ## RStudio demo
 
-## Emacs demo
+## Emacs demo (?)
 
 ## Version control
 What is version control software?
@@ -367,6 +367,7 @@ What is version control software?
     - You will post your homework to your own GitHub repo
     - I will "fork" the repo, make comments/changes, and then submit a "pull request", which you will be able to see, comment on, and incorporate into your code
   - [BitBucket](https://bitbucket.org/) is another option
+  - [Here's a video](https://www.youtube.com/watch?v=w3jLJU7DT5E) if you want more (non-technical) descriptions about what GitHub is used for
   
 ## Signing up on GitHub
   - Go to https://github.com/
@@ -385,12 +386,12 @@ What is version control software?
 2 + 2
 ```
 
-## Testing version control
+## Testing version control {.smaller}
   - If you haven't already, `git config` for name and email
   - In RStudio, go to File > New Project...
   - Version Control
   - Git
-  - https://github.com/scottrjackson/r_programming_bsos_winter2016.git
+  - https://github.com/scottrjackson/r_programming_bsos_winter2017.git
 
 # Next steps
 
@@ -410,10 +411,13 @@ What is version control software?
 ## Homework and final project
   - Your final project will be a full-blown reproducible report of an interesting analysis on some data of your choosing.
   - It will represent a cumulative application of what we cover in the course.
-  - You will extend it in some way that is not covered directly in class.
+  - You will extend it in some way that is (probably) not covered directly in class.
   - The homework assignments are designed to help you build towards this goal.
 
 ## Today's homework
+
+See PDF in `day01` folder of the class repo for lots of details
+
   1. Finish with any installation/sign-up steps that you did not complete already
   2. (optional) Run through the installation process again
     - getting a friend set up
@@ -441,7 +445,7 @@ What is version control software?
   - R has lots of built-in data sets (also available in many packages)
   - You can see all the available data sets in R by typing the command:
 
-```{r}
+```{r eval=FALSE}
 data()
 ```
 
@@ -456,7 +460,7 @@ data()
     - THREE initial questions you think you could ask and (at least partially) address with this data. Try to make the questions as SIMPLE as possible!
   - I will reply with comments, and suggestions for changes if needed.
   - This is the ONE assignment you can "re-do" later for credit, if I ask you to do something different.
-  - BEFORE 9am 1/5/2015 (I will check email timestamps)
+  - BEFORE 9am 1/10/2017 (I will check email timestamps)
   - Even if you're not 100% decided, send me the above info for some possibility, by 9am, to receive credit
 
 # FIN (questions?)

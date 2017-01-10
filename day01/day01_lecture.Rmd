@@ -5,8 +5,6 @@ date: 2017-01-09
 output: ioslides_presentation
 ---
 
-# Here's a new slide
-
 # Outline
 
 ## What are we doing today?
@@ -384,7 +382,7 @@ What is version control software?
   - Open RStudio
   - Type something in the console, like
   
-```{r results = "hide"}
+```{r eval=FALSE}
 2 + 2
 ```
 

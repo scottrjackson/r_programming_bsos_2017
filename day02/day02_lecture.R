@@ -29,7 +29,6 @@
 #   it's treated as part of that string and not as a comment character)
 # - you can run entire scripts using `source()` function
 
-
 # Some syntax basics
 # - whitespace (mostly) doesn't matter
 # - no "line end" character
@@ -52,6 +51,12 @@
 x <- 9534 * 7389
 x
 
+# you can also use `=`
+# arrows go both ways
+
+74646 / 445 -> y
+y
+
 objects() # display objects in workspace
 ls()      # same as objects()
 
@@ -62,6 +67,21 @@ x
 rm(list = objects()) # remove everything
 
 objects()
+
+# object naming conventions
+# cannot start with a number
+# 1b <- 10  # gets an error
+b1 <- 10
+
+camelCase <- 10
+dot.delimited <- 10
+underscore_delimited <- 10
+
+# case matters
+x <- 10
+X <- 15
+x
+X
 
 # objects have structure
 # simple structure: vectors
@@ -91,6 +111,18 @@ my.sequence[7:11]
 # syntax note: [square brackets] are used ONLY for "extraction"
 #              (parentheses) are used in math, and in functions (more below)
 
+3 + 2 * 4
+(3 + 2) * 4
+
+# vectors:
+# - all a single data type
+# - always one-dimensional
+# - multi-dimentional things are other types of objects
+#   - data frames
+#   - lists
+#   - matrices
+#   - arrays
+
 # data.frame
 ?sleep
 sleep
@@ -101,9 +133,10 @@ sleep[, 1]
 
 # data frames also have "names" for columns, not just numbers
 
-sleep[, "extra"]
+sleep[ , "extra"]
 sleep$extra       # equivalent
 
+names(sleep)
 str(sleep)
 class(sleep)
 
@@ -124,12 +157,34 @@ seq(from = 1, to = 10, by = 3)  # most functions have "arguments"
 # example: t.test()
 
 # with made-up vectors
+vector1 <- c(1:10)
+vector2 <- c(3:12)
 
+t.test(x = vector1, y = vector2)
+my.results <- t.test(x = vector1, y = vector2)
+print(my.results)
+str(my.results)
+my.results$p.value
 
 ###################
 # PRACTICE
 
 # using [] and <-, pull out some numbers from the sleep data, and compare with t.test
+
+sleep[1:10, 1]
+sleep[11:20, 1]
+
+t.test(x = sleep[1:10, 1], y = sleep[11:20, 1])
+
+group1 <- sleep[1:10, 1]
+group2 <- sleep[11:20, 1]
+t.test(x = group1, y = group2)
+
+sleep$extra[1:10]
+sleep[1:10, ]$extra
+sleep[1:10, "extra"]
+
+objects()[1:5]  # brackets pull out values from whatever is to the left
 
 ###################
 
@@ -138,19 +193,55 @@ seq(from = 1, to = 10, by = 3)  # most functions have "arguments"
 # - order
 # - optional vs. required
 
+t.test(y = group2, x = group1)
+t.test(group1, group2)
+t.test(group1)
+
 # getting help()
 
 help(t.test)
 ?t.test      # equivalent
 
+# finding help
+# Google
+# "fuzzy matching"
+
 # sometimes hints from tab-completion in RStudio
 
+# can be sloppy with argument names
+
+t.test(group1, group2, var.equal = TRUE)
+t.test(group1, group2, var.e = TRUE)
+
 # return to t-test
+t.test(extra ~ group, data = sleep, paired = TRUE)
+t.test(extra ~ group, sleep, paired = TRUE)
+t.test(sleep, extra ~ group, paired = TRUE)
+t.test(data = sleep, extra ~ group, paired = TRUE)
+t.test(data = sleep, extra ~ group, 4:14)
+
+t.test(data = sleep, extra ~ group, paired = FALSE)
+
+search()
+
+summary(sleep)
+
+summary <- function(x) { print("fooled you!") }
+
+rm("summary")
+summary(sleep)
 
 ###################
 # Packages
 
+library(MASS)
+install.packages("dplyr")
+library(dplyr)
+install.packages(c("ggplot2", "tidyr", "lme4"))
+library(ggplot2)
+library(mice)
 
+update.packages()
 
 ##################
 # Environments
@@ -159,13 +250,40 @@ help(t.test)
 
 # naming conflicts
 
-# saving workspaces & objects
+MASS::select(x)
+select(x)
 
+# saving workspaces & objects
+my.results
+save(my.results, file = "t-test_results.RData")
+
+load("t-test_results.RData")
+my.results
+str(my.results)
 
 ##################
 # Reading data from files
 
 # read.table() family
+?read.table
+# for SPSS
+# old package: `foreign`
+# new package: `haven`
+
+# for Excel: `readxl`
+install.packages("readxl")
+library(readxl)
 
 # some convenient ways to get initial glances at your data
+mydata <- read.csv("scottdata/CognitionPaperFinalData.csv")
+head(mydata, 20)
+tail(mydata)
 
+nrow(mydata)
+ncol(mydata)
+
+summary(mydata)
+
+install.packages("psych")
+library(psych)
+describe(mydata)

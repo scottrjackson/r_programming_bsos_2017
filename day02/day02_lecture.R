@@ -284,6 +284,9 @@ ncol(mydata)
 
 summary(mydata)
 
+colnames(mydata)
+names(mydata)
+
 install.packages("psych")
 library(psych)
 describe(mydata)

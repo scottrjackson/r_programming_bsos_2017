@@ -9,9 +9,10 @@ t.test(setosa.sep.width, virginica.sep.width)
 t.test(versicolor.sep.width, virginica.sep.width)
 
 iris.setvers <- iris[1:100, ]
-iris.setvirg <- iris[c(1:50, 101:150), ]
-iris.versvirg <- iris[c(51:150), ]
-setvers.ttest <- t.test(Sepal.Width ~ Species, iris.setvers)
+iris.setvirg <- iris[   c(1:50, 101:150)    , c(5, 2)      ]
+iris.setvirg <- iris[c(1:50, 101:150), c("Species", "Sepal.Width")]
+iris.versvirg <- iris[51:150, ]
+setvers.ttest <- t.test(Sepal.Width ~ Species, data = iris.setvers)
 setvirg.ttest <- t.test(Sepal.Width ~ Species, iris.setvirg)
 versvirg.ttest <- t.test(Sepal.Width ~ Species, iris.versvirg)
 
@@ -46,7 +47,7 @@ tooth.ttest.pair <- t.test(vc.len, oj.len, paired = TRUE)
 # 6. Run a Wilcoxon Signed Rank test for the same comparisons in #1
 #    - use help.search to find a function to do this
 ??Wilcoxon
-tooth.wilcox <- wilcox.test(vc.len, oj.len)
+tooth.wilcox <- wilcox.test(vc.len, jitter(oj.len))
 
 # 7. Save all results (and only those results!) in an
 #    .RData object

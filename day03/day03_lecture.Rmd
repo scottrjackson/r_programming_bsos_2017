@@ -92,15 +92,34 @@ write.csv(mydata, file = "outputfile.csv", row.names = FALSE) # good for writing
     - `&`  == "and"
     - `>=`  greater or equal
     - `!`  is NOT
-    - `&&` and `||`  for more specific programming sitauations
+    - `&&` and `||`  for more specific programming situations
     
 ```{r}
 3 < 4
 
 sleep
-sleep$extra > 0
+sleep$extra < 0 | sleep$extra > 4
+
+(sleep$extra < 0) & (sleep$extra > 4)
+
+!sleep$extra < 0
+
+c(1, 2, 3, 4) < c(0, 3, 1, 5)
 
 which(sleep$extra > 0)
+sleep$extra[sleep$extra > 0]
+
+iris[iris$Species == "setosa" | iris$Sepal.Length > 5, ]
+
+wrong.way <- iris[iris$Species == c("setosa", "virginica"), ] # does not work like you want it to
+nrow(wrong.way)
+
+right.way <- iris[iris$Species %in% c("setosa", "virginica"), ]
+nrow(right.way)
+
+not.in <- iris[!iris$Species %in% c("setosa", "virginica"), ]
+iris[iris$Species != "setosa", ]
+iris[!iris$Species == "setosa", ]
 
 ```
 
@@ -125,8 +144,9 @@ which(sleep$extra > 0)
     - = FALSE if you don't want to read in characters as factors
 
 ```{r}
-scott <- read.csv("../scottdata/CognitionPaperFinalData.csv")
+scott <- read.csv("scottdata/CognitionPaperFinalData.csv")
 summary(scott$Merged)
+summary(as.character(scott$Merged))
 levels(scott$Merged)
 levels(scott$Merged) <- c("Unmerged", "Merged") # only changing the labels
 levels(scott$Merged)
@@ -134,8 +154,15 @@ levels(scott$Merged) <- c("Merged", "Unmerged") # only changing the labels
 scott$Merged <- factor(scott$Merged, levels = c("Unmerged", "Merged"))
 
 # relevel()
+# takes the level specified and moves it to the front
+scott$Merged <- relevel(scott$Merged, "Merged")
+summary(scott$Merged)
+summary(scott$Corpus)
+scott$Corpus <- relevel(scott$Corpus, "RP")
+summary(scott$Corpus)
 
 # reorder()
+
 
 ```
 
@@ -148,6 +175,11 @@ mysleep
 mysleep$Study <- "Study1"
 mysleep$noise <- rnorm(20)
 mysleep
+mysleep$Gender <- c("Male", "Female")
+mysleep
+mysleep$Gender <- rep(c(rep("Male", 5), rep("Female", 5)), 2)
+mysleep
+
 mysleep$direction[mysleep$extra >= 0] <- "positive"
 mysleep$direction[mysleep$extra < 0] <- "negative"
 mysleep$direction <- factor(mysleep$direction, levels = c("positive", "negative"))
@@ -200,6 +232,11 @@ Handling NAs
 x <- c(1, 2, NA, 4, 68)
 mean(x)
 mean(x, na.rm = TRUE)
+
+x == NA
+is.na(x)
+!is.na(x)
+
 ```
   - sometimes it's other stuff
   - `cor()` use = "pairwise.complete.obs"

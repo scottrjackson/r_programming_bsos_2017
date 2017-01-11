@@ -3,12 +3,14 @@
 
 # 1. Read your data set into R
 mydata <- read.csv("scottdata/CognitionPaperFinalData.csv")
+class(mydata)
 
 # 2. Peek at the top few rows
 head(mydata)
 
 # 3. Peek at the top few rows for only a few columns
 head(mydata[, 1:3])
+mydata[1:6, 1:3]
 
 # 4. How many rows does your data have?
 nrow(mydata)
@@ -20,10 +22,11 @@ summary(mydata)
 summary(mydata$Corpus)
 
 # 7. Are any of the columns giving you unexpected values?
-Nope
+#Nope
 
 # 8. Select a few key columns, make a vector of the column names
 critical.columns <- colnames(mydata)[c(1, 2, 3, 6, 9)]
+critical.columns <- colnames(mydata[, c(1, 2, 3, 6, 9)])
 critical.columns
 
 # 9. Create a new data.frame with just that subset of columns
@@ -66,3 +69,10 @@ t.test(WithinMinPairs ~ Merged, critical.data)
 #     file from #14
 #     - ALTERNATIVELY, push your version of this script and your .RData results
 #       to a repo on GitHub, and send me the link
+
+# Excursion on data.frame
+new.data <- data.frame(subject = 1:30, 
+                       condition = c(rep("A", 15), rep("B", 15)), 
+                       score = rnorm(30), 
+                       session = 1)
+

@@ -6,7 +6,9 @@ output: html_document
 1. Make a "copy" of the `iris` data set in your workspace. Use `summary()` on it, identify a factor column.
 
 ```{r}
-
+myris <- iris
+summary(myris) # Species is a factor
+class(myris$Species)
 ```
 
 2. Create different versions of the factor column, in the new data set:
@@ -14,13 +16,17 @@ output: html_document
    b. a character vector
    
 ```{r}
-
+myris$SpeciesNum <- as.numeric(myris$Species)
+myris$SpeciesChar <- as.character(myris$Species)
+head(myris)
+summary(myris)
 ```
 
 3. Use `xtabs()` to see how the values in these new columns line up with the original factor column.
 
 ```{r}
-
+xtabs(~ Species + SpeciesNum, myris)
+xtabs(~ Species + SpeciesChar, myris)
 ```
 
 4. Check the order of levels of Species with `levels()`. Create a new column from this factor, changing the order of the levels, using:
@@ -29,6 +35,21 @@ output: html_document
   c. `factor()`
 
 ```{r}
+levels(myris$Species)
+myris$SpeciesNew1 <- relevel(myris$Species, "virginica")
+levels(myris$SpeciesNew1)
+myris$SpeciesNumNew1 <- as.numeric(myris$SpeciesNew1)
+xtabs(~ SpeciesNew1 + SpeciesNumNew1, myris)
+
+myris$SpeciesOrder[myris$Species == "setosa"] <- 3
+myris$SpeciesOrder[myris$Species == "virginica"] <- 1
+myris$SpeciesOrder[myris$Species == "versicolor"] <- 2
+xtabs(~ Species + SpeciesOrder, myris)
+myris$SpeciesNew2 <- reorder(myris$Species, myris$SpeciesOrder)
+levels(myris$SpeciesNew2)
+
+myris$SpeciesNew3 <- factor(myris$Species, levels = c("versicolor", "virginica", "setosa"))
+levels(myris$SpeciesNew3)
 
 ```
 
@@ -38,9 +59,17 @@ output: html_document
    - display the rows of the data frame where the WithinMinPairs variable has missing values
    - create a new column that's a copy of the WithinMinPairs column
    - replace all missing values in this column with zeros
-   - use `xtabs()` to check this change in coding
+   - try using `xtabs()` to check this change in coding (why doesn't this work?)
+   - try another method for double-checking your coding
 
 ```{r}
-scottdata <- read.csv("../scottdata/CognitionPaperModifiedData.csv")
+scottdata <- read.csv("scottdata/CognitionPaperModifiedData.csv")
+summary(scottdata)
+scottdata[is.na(scottdata$WithinMinPairs), ]
+scottdata$CompleteWithinMinPairs <- scottdata$WithinMinPairs
+scottdata$CompleteWithinMinPairs[is.na(scottdata$CompleteWithinMinPairs)] <- 0
+xtabs(~ WithinMinPairs + CompleteWithinMinPairs, scottdata)
+summary(scottdata)
+scottdata[is.na(scottdata$WithinMinPairs), c("WithinMinPairs", "CompleteWithinMinPairs")]
 ```
 

@@ -1,0 +1,229 @@
+---
+title: "Day 4 Lecture"
+output: html_document
+---
+
+# Today's agenda
+
+  - Review
+  - PRACTICE: data type coersion
+  - Lists
+  - NAs, NULLs, NaNs
+  - Binding & merging data frames
+  - PRACTICE: binding & merging
+  - Manipulating and transforming variables
+  - PRACTICE: transformations
+  - Reshaping data & "tidy" data
+  - Aggregation (e.g., cells means)
+  - PRACTICE: reshaping & aggregation
+
+# Data types & coersion
+
+# Lists
+  - similar to vectors
+  - can contain different data types
+  - use [[ ]] to pull out values
+  - handy for glomming large/complex objects together
+  
+```{r}
+x <- c(1, 2, 3, 4, 5)
+x
+y <- c(1, "George", as.Date("2017-01-12"), factor("level1"))
+y
+z <- list(1, "George", as.Date("2017-01-12"), factor("level1"), 1:20, head(sleep))
+z
+lapply(z, class)
+
+z[6]
+class(z[6])
+class(z[[6]])
+names(z) <- c("num", "name", "date", "factor", "values", "data")
+z["data"]
+z[["data"]]
+z$data
+length(z)
+
+# data.frames are (special) lists
+sleep["extra"]
+sleep[["extra"]]
+length(sleep)
+
+identical(sleep$extra, sleep["extra"])
+identical(sleep$extra, sleep[["extra"]])
+
+```
+
+# NAs, NULLs
+
+## NAs
+  - missing data
+  - can be a a huge pain
+  - no universal "handle NAs" or "ignore NAs" argument
+  - sometimes `na.rm = TRUE` (like for `mean()`)
+  - sometimes it's other stuff
+  - `cor()` use = "pairwise.complete.obs"
+  - no universal "deal with NAs" argument
+  
+```{r}
+x <- c(1, 2, NA, 4, 68)
+mean(x)
+mean(x, na.rm = TRUE)
+y <- c(NA, 4, 23, 2, 6)
+
+cor(x, y)
+cor(x, y, use = "complete.obs")
+
+x == NA
+is.na(x)
+!is.na(x)
+
+```
+
+## NULL
+  - another special value
+  - means "nothing" or "doesn't exist" (contrast with "missing" or "unknown")
+
+```{r}
+x <- c(1, 2, NA)
+y <- c(1, 2, NULL)
+x
+y
+length(x)
+length(y)
+x <- 1:10
+y <- z <- x
+y[4] <- NA
+z[4] <- NULL
+
+mysleep <- sleep
+head(mysleep)
+colnames(mysleep)
+mysleep$ID <- NULL
+head(mysleep)
+colnames(mysleep)
+```
+
+## Inf, -Inf, NaN
+  - can sometimes result from mathematical operations
+  - helpful to be able to identify, locate them
+
+```{r}
+x <- 1/0
+y <- -1/0
+z <- sqrt(-4)
+x
+y
+z
+
+is.finite(x)
+is.finite(y)
+is.finite(z)
+
+is.infinite(x)
+is.infinite(y)
+is.infinite(z)
+
+is.nan(x)
+is.nan(y)
+is.nan(z)
+
+
+```
+
+# Data manipulation
+
+## Combining data frame objects
+### `rbind()` and `cbind()`
+  - `rbind()`
+    - glues rows on top of each other
+    - expects same columns
+  - `cbind()`
+    - glues columns next to each other
+    - need to be the same length
+  - from `dplyr`
+    - `bind_rows()` is better at allowing different sets/orders of columns
+      - also gives you the option to "id" the the pieces you're putting together
+    - `bind_cols()`
+    
+```{r}
+sleep1 <- sleep[sleep$group == 1,  ]
+sleep2 <- sleep[sleep$group == 2,  ]
+sleep1
+sleep2
+sleep.reassembled <- rbind(sleep1, sleep2)
+sleep.reassembled
+
+# rbind_list
+library(dplyr)
+sleep2b <- sleep2
+sleep2b$new.column <- "other data"
+# rbind(sleep1, sleep2b) # doesn't work
+data.frame(rbind_list(sleep1, sleep2b)) # from dplyr package
+rbind_all(list(sleep1, sleep2b))
+
+sleep.left <- sleep[, 1:2]
+sleep.left
+sleep.ID <- sleep[, 3]
+sleep.ID
+sleep.reassembled.2 <- cbind(sleep.left, sleep.ID)
+sleep.reassembled.2
+```
+
+### `merge()`
+```{r}
+subject.info <- data.frame(ID = 3:12, gender = c("male", "male", "female", "female", "female", "female", "male", "female", "male", "male"))
+subject.info
+
+sleep.merged <- merge(sleep, subject.info)
+sleep
+sleep.merged
+nrow(sleep)
+nrow(sleep.merged)
+
+mysleep <- sleep
+mysleep$ID <- as.numeric(mysleep$ID)
+
+sleep.merged2 <- merge(mysleep, subject.info, all = TRUE)
+sleep.merged2
+
+```
+    - simplest: have ONE column in common, named the same thing (with the same values)
+    - can get MUCH more complex
+    - `nrow()` good check on what was gained/lost during a merge
+
+# Data transformations    
+## Creating new columns
+
+```{r}
+mysleep
+mysleep$Study <- "Study1"
+mysleep$noise <- rnorm(20)
+mysleep
+```
+
+## Simple column transformations
+
+```{r}
+mysleep <- sleep
+mysleep$extra2 <- mysleep$extra * 2
+mysleep$extra3 <- log(mysleep$extra + 10)
+mysleep
+mysleep$extra2 <- mysleep$extra2 - 4
+mysleep
+mysleep$extra2 <- NULL  # deletes the column
+mysleep
+mysleep$extra3 <- NA
+mysleep
+mysleep$three <- 3
+mysleep
+# mysleep$four <- c(1, 2, 3) # doesn't work
+mysleep$five <- c(1, 2, 3, 4) # does work (recycling)
+mysleep
+
+rep(2, 10)
+rep(2:4, 10)
+rep(2:4, each = 10)
+
+rep(1:2, each = 5)
+
+```

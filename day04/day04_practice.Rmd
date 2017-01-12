@@ -1,0 +1,24 @@
+---
+title: "Day 4 Practice"
+output: html_document
+---
+
+1. What are the four primary/basic data types in R?
+   - Practice creating a vector of each data type
+   - Using c(), concatenate pairs of these vectors together
+   - What happens?  What data types are coerced to what?
+
+```{r}
+
+```
+
+2. Make a copy of the `iris` data frame
+  - Using `sample()` pull the data apart into two random batches
+  - Put the pieces back together with `rbind()`
+  - Put the pieces back together with `bind_rows()` from the `dplyr` package, creating an ID that keeps track of which piece is which
+  
+  
+```{r}
+
+```
+

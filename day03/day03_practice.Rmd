@@ -9,6 +9,15 @@ output: html_document
 myris <- iris
 summary(myris) # Species is a factor
 class(myris$Species)
+
+lapply(myris, is.factor)
+
+is.factor(myris[ , 1])
+is.factor(myris[ , 2])
+is.factor(myris[ , 3])
+is.factor(myris[ , 4])
+is.factor(myris[ , 5])
+
 ```
 
 2. Create different versions of the factor column, in the new data set:
@@ -20,6 +29,18 @@ myris$SpeciesNum <- as.numeric(myris$Species)
 myris$SpeciesChar <- as.character(myris$Species)
 head(myris)
 summary(myris)
+
+mysleep <- sleep
+summary(mysleep)
+mysleep <- mysleep[mysleep$ID !=  "4", ]
+summary(mysleep)
+mysleep <- droplevels(mysleep)
+summary(mysleep$ID)
+as.numeric(mysleep$ID)
+mysleep$IDnum <- as.numeric(mysleep$ID)
+xtabs(~ IDnum + ID, mysleep)
+xtabs(~ as.numeric(mysleep$ID) + ID, mysleep)
+
 ```
 
 3. Use `xtabs()` to see how the values in these new columns line up with the original factor column.
@@ -41,9 +62,9 @@ levels(myris$SpeciesNew1)
 myris$SpeciesNumNew1 <- as.numeric(myris$SpeciesNew1)
 xtabs(~ SpeciesNew1 + SpeciesNumNew1, myris)
 
-myris$SpeciesOrder[myris$Species == "setosa"] <- 3
-myris$SpeciesOrder[myris$Species == "virginica"] <- 1
-myris$SpeciesOrder[myris$Species == "versicolor"] <- 2
+myris$SpeciesOrder[myris$Species == "setosa"] <- 6
+myris$SpeciesOrder[myris$Species == "virginica"] <- 2
+myris$SpeciesOrder[myris$Species == "versicolor"] <- 4
 xtabs(~ Species + SpeciesOrder, myris)
 myris$SpeciesNew2 <- reorder(myris$Species, myris$SpeciesOrder)
 levels(myris$SpeciesNew2)
@@ -66,7 +87,9 @@ levels(myris$SpeciesNew3)
 scottdata <- read.csv("scottdata/CognitionPaperModifiedData.csv")
 summary(scottdata)
 scottdata[is.na(scottdata$WithinMinPairs), ]
+# scottdata[!is.na(scottdata$WithinMinPairs), ] # gets rid of missing data
 scottdata$CompleteWithinMinPairs <- scottdata$WithinMinPairs
+identical(scottdata$CompleteWithinMinPairs, scottdata$WithinMinPairs)
 scottdata$CompleteWithinMinPairs[is.na(scottdata$CompleteWithinMinPairs)] <- 0
 xtabs(~ WithinMinPairs + CompleteWithinMinPairs, scottdata)
 summary(scottdata)

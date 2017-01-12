@@ -6,6 +6,7 @@ output: html_document
 # Today's agenda
 
   - Review
+  - side track review on factors
   - PRACTICE: data type coersion
   - Lists
   - NAs, NULLs, NaNs
@@ -16,6 +17,31 @@ output: html_document
   - Reshaping data & "tidy" data
   - Aggregation (e.g., cells means)
   - PRACTICE: reshaping & aggregation
+
+# More on factors
+
+```{r}
+mysleep <- sleep
+levels(mysleep$group) <- c("pre", "post")
+summary(mysleep)
+
+paste("s", "1", sep = "")
+mysleep$ID <- factor(paste("s", mysleep$ID, sep = ""), levels = c("s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10"))
+summary(mysleep)
+
+```
+
+# Excursion: functions don't (usually) change objects
+
+```{r}
+x <- c(3, 6, 2, 34, 7, 8, 22, 30)
+sort(x)
+x
+y <- sort(x)
+x <- sort(x)
+
+```
+
 
 # Data types & coersion
 
@@ -30,23 +56,37 @@ x <- c(1, 2, 3, 4, 5)
 x
 y <- c(1, "George", as.Date("2017-01-12"), factor("level1"))
 y
-z <- list(1, "George", as.Date("2017-01-12"), factor("level1"), 1:20, head(sleep))
+z <- list(1, "George", as.Date("2017-01-12"), factor("level1"), 1:100, head(sleep))
 z
 lapply(z, class)
 
 z[6]
 class(z[6])
 class(z[[6]])
+names(z) 
 names(z) <- c("num", "name", "date", "factor", "values", "data")
 z["data"]
 z[["data"]]
 z$data
 length(z)
 
+summary(head(mysleep))
+summary(z[6])
+summary(z[[6]])
+summary(z$data)
+#  $ is the same as [[ ]]
+
 # data.frames are (special) lists
+sleep[, "extra"]
 sleep["extra"]
 sleep[["extra"]]
+class(sleep[, "extra"])
+class(sleep$extra)
+class(sleep[["extra"]])
+class(sleep["extra"])
+
 length(sleep)
+nrow(sleep)
 
 identical(sleep$extra, sleep["extra"])
 identical(sleep$extra, sleep[["extra"]])
@@ -57,7 +97,7 @@ identical(sleep$extra, sleep[["extra"]])
 
 ## NAs
   - missing data
-  - can be a a huge pain
+  - can be a huge pain
   - no universal "handle NAs" or "ignore NAs" argument
   - sometimes `na.rm = TRUE` (like for `mean()`)
   - sometimes it's other stuff
@@ -118,15 +158,22 @@ z
 is.finite(x)
 is.finite(y)
 is.finite(z)
+is.finite(NA)
 
 is.infinite(x)
 is.infinite(y)
 is.infinite(z)
+is.infinite(NA)
 
 is.nan(x)
 is.nan(y)
 is.nan(z)
+is.nan(NA)
 
+is.na(x)
+is.na(y)
+is.na(z) # surprising to me
+is.na(NA)
 
 ```
 

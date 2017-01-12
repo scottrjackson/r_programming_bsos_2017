@@ -43,7 +43,20 @@ c(numbers, factors2)
   
   
 ```{r}
+nrow(iris)
+rows.to.pull <- sample(1:nrow(iris), nrow(iris)/2)
+iris1 <- iris[rows.to.pull, ]
+iris2 <- iris[-(rows.to.pull), ] # everything *except* those row numbers in rows.to.pull
 
+head(iris)
+head(iris[, -5]) # everything *except* column 5
+
+iris.reassembled <- rbind(iris1, iris2)
+iris.reassembled <- bind_rows(iris1, iris2, .id = "batch")
+head(iris.reassembled)
+summary(iris.reassembled)
+iris.reassembled <- bind_rows("batch1" = iris1, "batch2" = iris2, .id = "batch")
+head(iris.reassembled)
 ```
 
 3. Make a copy of the `iris` data frame
@@ -52,6 +65,27 @@ c(numbers, factors2)
   - Put the pieces back together with `bind_cols()` from the `dplyr` package
 
 ```{r}
+colnames(iris)
+iris.left <- iris[, 1:2]
+iris.right <- iris[, 3:5]
+
+new.iris <- cbind(iris.left, iris.right)
+head(new.iris)
+
+iris.left2 <- iris[, 1:4]
+iris.right2 <- iris[, 5]
+
+new.iris2 <- cbind(iris.left2, iris.right2)
+colnames(new.iris2)
+colnames(new.iris2)[5]
+colnames(new.iris2)[5] <- "Species"
+colnames(new.iris2)
+
+new.iris3 <- bind_cols(iris.left, iris.right)
+head(new.iris3)
+
+bind_cols(list(iris.left, iris.right))
+cbind(list(iris.left, iris.right))
 
 ```
 

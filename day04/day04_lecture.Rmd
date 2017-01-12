@@ -191,22 +191,27 @@ is.na(NA)
     - `bind_rows()` is better at allowing different sets/orders of columns
       - also gives you the option to "id" the the pieces you're putting together
     - `bind_cols()`
+      - can also work if you give it a list argument
     
 ```{r}
-sleep1 <- sleep[sleep$group == 1,  ]
-sleep2 <- sleep[sleep$group == 2,  ]
-sleep1
-sleep2
-sleep.reassembled <- rbind(sleep1, sleep2)
-sleep.reassembled
-
-# rbind_list
 library(dplyr)
-sleep2b <- sleep2
-sleep2b$new.column <- "other data"
-# rbind(sleep1, sleep2b) # doesn't work
-data.frame(rbind_list(sleep1, sleep2b)) # from dplyr package
-rbind_all(list(sleep1, sleep2b))
+sleep1 <- droplevels(sleep[sleep$group == "1",  ])
+sleep2 <- droplevels(sleep[sleep$group == "2",  ])
+summary(sleep1)
+summary(sleep2)
+sleep.reassembled <- rbind(sleep1, sleep2)
+summary(sleep.reassembled)
+
+sleep.reassembled2 <- bind_rows(sleep1, sleep2)
+summary(sleep.reassembled2)
+
+sleep1$noise <- rnorm(10)
+
+sleep.reassembled <- rbind(sleep1, sleep2)
+summary(sleep.reassembled)
+
+sleep.reassembled2 <- bind_rows(sleep1, sleep2)
+summary(sleep.reassembled2)
 
 sleep.left <- sleep[, 1:2]
 sleep.left
@@ -214,6 +219,25 @@ sleep.ID <- sleep[, 3]
 sleep.ID
 sleep.reassembled.2 <- cbind(sleep.left, sleep.ID)
 sleep.reassembled.2
+
+sleep.ID <- as.data.frame(sleep[, 3])
+sleep.ID
+
+sleep.reassembled.2 <- cbind(sleep.left, sleep.ID)
+sleep.reassembled.2
+
+sleep.ID <- as.data.frame(sleep[3])  # or sleep["ID"]
+sleep.ID
+
+sleep.reassembled.2 <- cbind(sleep.left, sleep.ID)
+sleep.reassembled.2
+
+sleep.reassembled.3 <- cbind(list(sleep.left, sleep.ID))
+sleep.reassembled.3
+
+sleep.reassembled.4 <- bind_cols(list(sleep.left, sleep.ID))
+sleep.reassembled.4
+
 ```
 
 ### `merge()`

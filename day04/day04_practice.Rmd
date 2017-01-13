@@ -88,26 +88,3 @@ bind_cols(list(iris.left, iris.right))
 cbind(list(iris.left, iris.right))
 
 ```
-
-4. Make another copy of the iris data set
-  - Using `data.frame()` create a (small) table that assigns a color to each species.  That is, make a column called Species and a column called Color, with one row per species
-  - use `merge()` to merge the data into the copy of the iris data set
-  - create another table with an additional species (and color)
-  - merge this new table with iris. What happened?
-  - create one more table matching species to color, with only two rows, missing setosa
-  - merge this new table with the copy of iris. What happened?
-
-```{r}
-color.table <- data.frame(Species = c("setosa", "virginica", "versicolor"), Color = c("red", "blue", "violet"))
-
-```
-
-5. Make (yet another) copy of the iris data set
-  - Create a column that takes the log of the Sepal.Width
-  - Create a column that represents the multiplication of Sepal.Width by Sepal.Length
-  - Create a "median split" column on Sepal.Width. In other words, calculate the median of Sepal.Width, and then create a column that indicates whether the value in that row is less than the median or not
-  
-  
-```{r}
-
-```

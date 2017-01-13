@@ -1,0 +1,400 @@
+---
+title: "Day 5 Lecture"
+output: html_document
+---
+
+# Outline
+  - Review Homework 4
+  - Merging with `merge()`
+  - PRACTICE: merging
+  - Manipulating and transforming variables
+  - PRACTICE: transformations
+  - Reshaping data & "tidy" data
+  - Aggregation (e.g., cells means)
+  - PRACTICE: reshaping & aggregation
+  - Graphics
+    - base graphics
+    - ggplot2 basics
+    - graphics "devices" and saving graphics
+  - PRACTICE: histograms and scatterplots
+
+# Homework 4 Review
+
+# Merging with `merge()`
+
+```{r}
+subject.info <- data.frame(ID = 3:12, gender = c("male", "male", "female", "female", "female", "female", "male", "female", "male", "male"))
+subject.info
+
+sleep.merged <- merge(sleep, subject.info)
+sleep
+sleep.merged
+nrow(sleep)
+nrow(sleep.merged)
+
+mysleep <- sleep
+mysleep$ID <- as.numeric(mysleep$ID)
+
+sleep.merged2 <- merge(mysleep, subject.info, all = TRUE)
+sleep.merged2
+
+```
+
+Merging notes:
+    - simplest: have ONE column in common, named the same thing (with the same values)
+    - can get MUCH more complex (as needed)
+      - look at "join" functions in `dplyr` for alternative functions
+    - `nrow()` good check on what was gained/lost during a merge
+
+# Data transformations    
+## Creating new columns
+
+```{r}
+mysleep
+mysleep$Study <- "Study1"
+mysleep$noise <- rnorm(20)
+mysleep
+```
+
+## Simple column transformations
+
+```{r}
+mysleep <- sleep
+mysleep$extra2 <- mysleep$extra * 2
+mysleep$extra3 <- log(mysleep$extra + 10)
+mysleep
+mysleep$extra2 <- mysleep$extra2 - 4
+mysleep
+mysleep$extra2 <- NULL  # deletes the column
+mysleep
+mysleep$extra3 <- NA
+mysleep
+mysleep$three <- 3
+mysleep
+# mysleep$four <- c(1, 2, 3) # doesn't work
+mysleep$five <- c(1, 2, 3, 4) # does work (recycling)
+mysleep
+
+rep(2, 10)
+rep(2:4, 10)
+rep(2:4, each = 10)
+
+rep(1:2, each = 5)
+
+```
+
+# Keeping "tidy" data
+
+    - `tidyr`
+    - https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html
+    - http://vita.had.co.nz/papers/tidy-data.html
+    - Principle: variables/data in columns, observations/cases in rows
+    - wide vs. long data
+      - usually long data is easier to work with
+      - sometimes wide formats are useful/convenient
+      - moving between the two is important!
+    - `reshape2` also very powerful
+
+## Reshaping with `tidyr` 
+   
+```{r}
+library(tidyr)
+mysleep <- sleep
+mysleep
+levels(mysleep$group) <- c("pre", "post")
+
+# spread(yourdata, factor.to.spread.by, column.with.values)
+mysleep.wide <- spread(mysleep, group, extra)
+mysleep.wide
+# QUICK PRACTICE: compute gains
+
+# gather(yourdata, new.factor.column.name, measure.column.name, columns.to.gather)
+mysleep.long <- gather(mysleep.wide, time, extra.sleep, c(pre,post))
+mysleep.long
+```
+
+## PRACTICE
+
+## Splitting up columns
+  - another "tidy data" goal
+  - if a column represents multiple things/datapoints, split it up!
+  - use `separate()` from `tidyr`
+
+```{r}
+colnames(who)
+who.long <- gather()
+
+who.long <- separate(who.long, COL, sep = , c("colnames"))
+head(who.long)
+
+```
+
+# Data cleaning
+## A guideline template for data cleaning
+  1. Get the data to read in to R
+  2. Check all columns to make sure data is getting read in correctly
+  3. Check NAs, decide what to do with them
+  4. Remove excessive rows or other "defective" rows
+  5. Reshape as needed (tend towards "long" formats)
+  6. Get data out of column *names*, and into columns (variables)
+  7. Fix/clean up column names
+  8. Re-code factors as needed
+  
+## Reading data
+  - find a good `read.X()` function, where X = your type of data
+    - `read.table()` is the basic one
+    - `read.csv()` and `read.delim()` are convenience "wrappers" for `read.table()`, for CSV and tab-delimited files, respectively
+    - `read.spss()` and `read.dta()` from the `foreign` package for SPSS and Stata files
+  - for messier or more primitive kinds of files in weird formats, use `readLines()`, or `scan()` to pull in the data in a very raw format, which you will then need to format in R
+
+## Check all columns
+
+## Check NAs
+  - use summary()
+
+## Remove rows/columns as needed
+
+## Reshape as needed
+
+## Get data out of column names, into variables
+
+## Fix/improve column names
+
+## Re-code factors as needed
+
+# Split-apply-combine with the `dplyr` package
+
+## Aggregation
+
+```{r}
+library(dplyr)
+library(reshape2)
+
+myff <- french_fries
+head(myff)
+
+# make long
+
+# get "cell means"
+ff.means <- summarize(group_by(myff.long, treatment, taste), mean = mean(rating))
+
+# other summary computations
+
+```
+
+## Forward-pipe operator (from `magrittr` package)
+["This is not a pipe"](https://en.wikipedia.org/wiki/The_Treachery_of_Images)
+
+  - `%>%` operator
+  - effect: pass the results of the thing on the left to the first argument of the thing on the right
+  - very commonly used in `dplyr`
+
+```{r}
+x <- 1:10
+mean(log(x + 2))
+
+(x + 2) %>% log() %>% mean()
+
+summarize(group_by(myff.long, treatment, taste), mean.rating = mean(rating, na.rm = TRUE))
+
+# same as above, using the %>% operator
+group_by(myff.long, treatment, taste) %>% summarize(mean.rating = mean(rating, na.rm = TRUE))
+
+```
+
+## Subsetting with `dplyr`
+  - `filter()` is for subsetting rows
+  - `select()` is for subsetting columns
+
+```{r}
+sleep
+sleep[sleep$group == 1, ]
+filter(sleep, group == 1) # same results
+
+sleep[sleep$group == 1 & sleep$extra > 0.2, ]
+filter(sleep, group == 1, extra > 0.2) # same results
+
+sleep[ , c("ID", "extra")]
+select(sleep, ID, extra)
+select(sleep, 3, 1)
+select(sleep, c(3, 1))
+select(sleep, c("ID", "extra")) # doesn't work
+select(sleep, c(ID, extra))
+select_(sleep, "ID", "extra") # "underscore" variants of dplyr functions:
+                              #   - can use strings to identify objects
+                              #   - useful for more programmatic applications
+
+```
+
+
+# Notes on complex objects
+
+  - use `names()` and `str()` to look at the structure of a complex object
+  - most complex objects have a list-like structure
+  - S3 vs. S4 classes
+    - `$` notation works for S3
+    - Try `@` instead for S4 classes
+    - For more on S4: http://adv-r.had.co.nz/OO-essentials.html
+
+```{r}
+myff <- french_fries
+results <- lm(potato ~ treatment, data = myff)
+results
+summary(results)
+# plot(results)
+class(results)
+names(results)
+str(results)
+plot(results$residuals)
+results.summary <- summary(results)
+names(results.summary)
+results.summary$adj.r.squared
+results.summary$coefficients
+class(results.summary$coefficients)
+condition.pvals <- results.summary$coefficients[c("treatment2", "treatment3"), "Pr(>|t|)"]
+condition.pvals
+
+# str(summary(results))
+# ?lm
+```
+
+The adjusted $R^2$ for this model is `r results.summary$adj.r.squared`.
+
+# Graphics overview
+
+http://accidental-art.tumblr.com/
+
+## Two systems
+
+  - "base" graphics
+  - "grid" graphics
+  - See *R Graphics* by Paul Murrell for a very thorough "deep-dive" into these implementations:  https://www.stat.auckland.ac.nz/~paul/RG2e/
+
+### Base graphics
+  - more "primitive"
+  - can also be much faster than grid
+  - lots of isolated plot functions
+  - lots of weird little parameters to worry about
+  - some handy quick-plot functions from base graphics:
+    - `plot()` : a generic function that will often produce something interesting, can do scatterplots with a formula `y ~ x`
+    - `hist()` : histogram of a vector
+    - `boxplot()` : boxplot, using a formula `variable ~ grouping.factor`
+
+### Grid graphics
+  - better for more "high-level" plots
+  - much more complex underlying system (IMHO)
+  - more powerful and extendable
+  - the basis of extremely popular packages such as `lattice` and `ggplot2`
+
+## Graphics packages
+
+  - many packages will have some kind of graphics functions in them, for visualizing specific kinds of things
+  - these will often be in base graphics, "pre-canned", etc.
+  - the two best more general-purpose graphics packages are `lattice` and `ggplot2`
+  - `ggplot2` is another Hadley Wickham project, and has the most documentation, examples, and is currently most widely used
+
+# Using `ggplot2`
+
+## A "Grammar of Graphics"
+  - based on work by Leland Wilkinson, a "theory" of graphic display of data
+  - Hadley implemented this framework as his dissertation
+  - `ggplot2` is the overhauled version of the original implementation, and it is still under active development
+  - the idea is to implement a general system for mapping data variables to *aesthetics* (Wilkinson's term), i.e., visual dimensions (x, y, color, etc.)
+  - allows for high-level control of the structure of a plot, to allow for flexible, powerful visualizations
+  
+## Basic structure and concepts
+
+  - unlike base graphics, the *value* of `ggplot2` objects is a complex object, and `print()`-ing them renders the graph.
+  - the value of the object is built up by adding *layers*
+  - start with a call to `ggplot()` that specifies the data and some mappings of variables to aesthetics
+  - add "geoms" to actually render something
+  - add other things for fine control over graphical parameters, etc.
+
+## Graphing the `iris` package
+
+```{r}
+library(ggplot2)
+myris <- iris
+summary(myris)
+
+ggplot(myris, aes(x = Sepal.Length)) + geom_histogram()
+
+ggplot(myris, aes(x = Sepal.Length)) + geom_histogram(binwidth = .5)
+
+ggplot(myris, aes(x = Sepal.Length)) + geom_histogram(binwidth = .01)
+
+mybaseplot <- ggplot(myris, aes(x = Sepal.Length))
+
+mybaseplot + geom_histogram(binwidth = .2)
+
+names(mybaseplot)
+str(mybaseplot)
+
+base.density <- mybaseplot + geom_density(adjust = .5, fill = "grey")
+
+mydensity <- geom_density(adjust = .5, fill = "grey")
+
+mybaseplot + mydensity
+
+```
+
+```{r}
+colors()
+```
+
+```{r}
+pdf("bunch of plots.pdf")
+ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + geom_point()
+
+ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + geom_point(color = "papayawhip") + theme_classic()
+
+ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point(aes(color = Species), size = 10) + 
+  theme_minimal()
+
+ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point(aes(color = Species, size = Petal.Width)) + 
+  theme_minimal()
+
+ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point() + 
+  geom_smooth()
+
+ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) + 
+  geom_point(size = 4) + 
+  theme_minimal() +
+  geom_smooth(method = "lm")
+dev.off()
+
+```
+
+### Saving plots
+
+```{r}
+pdf("myplot.pdf", width = 10, height = 4)
+ggplot(myris, aes(x = Sepal.Length)) + geom_histogram() + 
+  facet_grid(Species ~ .)
+dev.off()
+
+?Devices
+```
+
+### Faceting
+
+```{r}
+
+ggplot(myris, aes(x = Sepal.Length)) + geom_histogram() + 
+  facet_wrap(~ Species)
+
+ggplot(myris, aes(x = Sepal.Length)) + geom_histogram() + 
+  facet_grid(Species ~ .)
+
+ggplot(myris, aes(x = Sepal.Length)) + geom_histogram() + 
+  facet_grid(Species ~ .)
+
+```
+

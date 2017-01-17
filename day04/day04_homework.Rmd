@@ -15,3 +15,36 @@ output: html_document
   - Explain (in words) what you are trying to do
   - Use binding/merging commands to accomplish this
 
+```{r}
+mydata <- as.data.frame(mydata[-1, ])
+
+
+
+```
+
+# Excursion about lists & brackets
+
+```{r}
+x <- 1:10
+class(x)
+x[3]
+
+y <- as.list(1:10)
+y[3]
+y[[3]]
+names(y) <- paste("thing", 1:10, sep = "")
+names(y)
+y[[3]]
+y$thing3 # same as [[ ]]
+y[["thing3"]] # also the same
+y["thing3"] # gets the "container" as well
+class(y["thing3"])
+class(y[["thing3"]])
+y[3]
+y["thing3"]
+y[c(FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)]
+y[y == 3]
+
+```
+
+# Excursion

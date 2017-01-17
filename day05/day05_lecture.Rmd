@@ -16,7 +16,7 @@ output: html_document
     - base graphics
     - ggplot2 basics
     - graphics "devices" and saving graphics
-  - PRACTICE: histograms and scatterplots
+  - PRACTICE
 
 # Homework 4 Review
 
@@ -25,20 +25,52 @@ output: html_document
 ```{r}
 subject.info <- data.frame(ID = 3:12, gender = c("male", "male", "female", "female", "female", "female", "male", "female", "male", "male"))
 subject.info
+subject.info2 <- data.frame(subject = 3:12, gender = c("male", "male", "female", "female", "female", "female", "male", "female", "male", "male"))
+subject.info2
 
+cbind(sleep, subject.info) # not what we want
+
+
+sleep.merged1 <- merge(x = sleep, y = subject.info,
+                       by = "ID")
+sleep.merged1
+# if your columns are named different things
+sleep.merged2 <- merge(x = sleep, y = subject.info2,
+                       by.x = "ID", by.y = "subject")
+sleep.merged2
+
+# when you have a column that's named the same in both,
+# R uses that column to merge (by default)
 sleep.merged <- merge(sleep, subject.info)
+?merge
 sleep
 sleep.merged
 nrow(sleep)
 nrow(sleep.merged)
 
 mysleep <- sleep
+# when merging by a factor, BE CAREFUL, especially when
+# factor levels are not the same between data.frames
 mysleep$ID <- as.numeric(mysleep$ID)
+
 
 sleep.merged2 <- merge(mysleep, subject.info, all = TRUE)
 sleep.merged2
 
 ```
+
+
+## Getting rid of duplicate rows
+
+```{r}
+sleep.double <- rbind(sleep, sleep)
+sleep.cleanedup <- unique(sleep.double)
+
+unique(sleep$ID)
+unique(c(1, 2, 2, 4, 5, 5, 6))
+
+```
+
 
 Merging notes:
     - simplest: have ONE column in common, named the same thing (with the same values)
@@ -52,7 +84,10 @@ Merging notes:
 ```{r}
 mysleep
 mysleep$Study <- "Study1"
+mysleep$Study2 <- c("Study1", "Study2")
 mysleep$noise <- rnorm(20)
+mysleep$noise2 <- rnorm(10)
+#mysleep$noise2 <- rnorm(8)
 mysleep
 ```
 
@@ -75,11 +110,12 @@ mysleep
 mysleep$five <- c(1, 2, 3, 4) # does work (recycling)
 mysleep
 
-rep(2, 10)
+rep(2, times = 10)
 rep(2:4, 10)
 rep(2:4, each = 10)
-
-rep(1:2, each = 5)
+rep(2:4, times = 3, each = 10)
+rep(1:2, 3, each = 5)
+c(rep(1:2, 3, each = 5), rep(1:8, 2, each = 3), 1:10)
 
 ```
 
@@ -107,6 +143,8 @@ levels(mysleep$group) <- c("pre", "post")
 mysleep.wide <- spread(mysleep, group, extra)
 mysleep.wide
 # QUICK PRACTICE: compute gains
+mysleep.wide$gains <- mysleep.wide$post - mysleep.wide$pre
+mysleep.wide
 
 # gather(yourdata, new.factor.column.name, measure.column.name, columns.to.gather)
 mysleep.long <- gather(mysleep.wide, time, extra.sleep, c(pre,post))
@@ -122,9 +160,12 @@ mysleep.long
 
 ```{r}
 colnames(who)
-who.long <- gather()
+who.long <- gather(who, stuff, counts, new_sp_m014:newrel_f65)
 
-who.long <- separate(who.long, COL, sep = , c("colnames"))
+who.long$stuff <- gsub("newrel", "new_rel", who.long$stuff)
+
+who.long <- separate(who.long, stuff, sep = "_", c("newold", "type", "gender.age"))
+summary(who.long)
 head(who.long)
 
 ```
@@ -174,11 +215,18 @@ myff <- french_fries
 head(myff)
 
 # make long
+myff.long <- gather(myff, flavor, rating, potato:painty)
+head(myff.long)
 
 # get "cell means"
-ff.means <- summarize(group_by(myff.long, treatment, taste), mean = mean(rating))
+ff.means <- summarize(group_by(myff.long, treatment, flavor), mean = mean(rating))
+ff.means
+ff.means <- summarize(group_by(myff.long, treatment, flavor), mean = mean(rating, na.rm = TRUE))
+ff.means
 
 # other summary computations
+ff.summaries <- summarize(group_by(myff.long, treatment, flavor), mean = mean(rating, na.rm = TRUE), std.dev = sd(rating, na.rm = TRUE), N = length(rating))
+ff.summaries
 
 ```
 
@@ -195,10 +243,10 @@ mean(log(x + 2))
 
 (x + 2) %>% log() %>% mean()
 
-summarize(group_by(myff.long, treatment, taste), mean.rating = mean(rating, na.rm = TRUE))
+summarize(group_by(myff.long, treatment, flavor), mean.rating = mean(rating, na.rm = TRUE))
 
 # same as above, using the %>% operator
-group_by(myff.long, treatment, taste) %>% summarize(mean.rating = mean(rating, na.rm = TRUE))
+group_by(myff.long, treatment, flavor) %>% summarize(mean.rating = mean(rating, na.rm = TRUE))
 
 ```
 
@@ -218,7 +266,7 @@ sleep[ , c("ID", "extra")]
 select(sleep, ID, extra)
 select(sleep, 3, 1)
 select(sleep, c(3, 1))
-select(sleep, c("ID", "extra")) # doesn't work
+#select(sleep, c("ID", "extra")) # doesn't work
 select(sleep, c(ID, extra))
 select_(sleep, "ID", "extra") # "underscore" variants of dplyr functions:
                               #   - can use strings to identify objects
@@ -260,141 +308,5 @@ condition.pvals
 
 The adjusted $R^2$ for this model is `r results.summary$adj.r.squared`.
 
-# Graphics overview
 
-http://accidental-art.tumblr.com/
-
-## Two systems
-
-  - "base" graphics
-  - "grid" graphics
-  - See *R Graphics* by Paul Murrell for a very thorough "deep-dive" into these implementations:  https://www.stat.auckland.ac.nz/~paul/RG2e/
-
-### Base graphics
-  - more "primitive"
-  - can also be much faster than grid
-  - lots of isolated plot functions
-  - lots of weird little parameters to worry about
-  - some handy quick-plot functions from base graphics:
-    - `plot()` : a generic function that will often produce something interesting, can do scatterplots with a formula `y ~ x`
-    - `hist()` : histogram of a vector
-    - `boxplot()` : boxplot, using a formula `variable ~ grouping.factor`
-
-### Grid graphics
-  - better for more "high-level" plots
-  - much more complex underlying system (IMHO)
-  - more powerful and extendable
-  - the basis of extremely popular packages such as `lattice` and `ggplot2`
-
-## Graphics packages
-
-  - many packages will have some kind of graphics functions in them, for visualizing specific kinds of things
-  - these will often be in base graphics, "pre-canned", etc.
-  - the two best more general-purpose graphics packages are `lattice` and `ggplot2`
-  - `ggplot2` is another Hadley Wickham project, and has the most documentation, examples, and is currently most widely used
-
-# Using `ggplot2`
-
-## A "Grammar of Graphics"
-  - based on work by Leland Wilkinson, a "theory" of graphic display of data
-  - Hadley implemented this framework as his dissertation
-  - `ggplot2` is the overhauled version of the original implementation, and it is still under active development
-  - the idea is to implement a general system for mapping data variables to *aesthetics* (Wilkinson's term), i.e., visual dimensions (x, y, color, etc.)
-  - allows for high-level control of the structure of a plot, to allow for flexible, powerful visualizations
-  
-## Basic structure and concepts
-
-  - unlike base graphics, the *value* of `ggplot2` objects is a complex object, and `print()`-ing them renders the graph.
-  - the value of the object is built up by adding *layers*
-  - start with a call to `ggplot()` that specifies the data and some mappings of variables to aesthetics
-  - add "geoms" to actually render something
-  - add other things for fine control over graphical parameters, etc.
-
-## Graphing the `iris` package
-
-```{r}
-library(ggplot2)
-myris <- iris
-summary(myris)
-
-ggplot(myris, aes(x = Sepal.Length)) + geom_histogram()
-
-ggplot(myris, aes(x = Sepal.Length)) + geom_histogram(binwidth = .5)
-
-ggplot(myris, aes(x = Sepal.Length)) + geom_histogram(binwidth = .01)
-
-mybaseplot <- ggplot(myris, aes(x = Sepal.Length))
-
-mybaseplot + geom_histogram(binwidth = .2)
-
-names(mybaseplot)
-str(mybaseplot)
-
-base.density <- mybaseplot + geom_density(adjust = .5, fill = "grey")
-
-mydensity <- geom_density(adjust = .5, fill = "grey")
-
-mybaseplot + mydensity
-
-```
-
-```{r}
-colors()
-```
-
-```{r}
-pdf("bunch of plots.pdf")
-ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + geom_point()
-
-ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + geom_point(color = "papayawhip") + theme_classic()
-
-ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + 
-  geom_point(aes(color = Species), size = 10) + 
-  theme_minimal()
-
-ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + 
-  geom_point(aes(color = Species, size = Petal.Width)) + 
-  theme_minimal()
-
-ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + 
-  geom_point() + 
-  geom_smooth()
-
-ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width)) + 
-  geom_point() + 
-  geom_smooth(method = "lm")
-
-ggplot(myris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) + 
-  geom_point(size = 4) + 
-  theme_minimal() +
-  geom_smooth(method = "lm")
-dev.off()
-
-```
-
-### Saving plots
-
-```{r}
-pdf("myplot.pdf", width = 10, height = 4)
-ggplot(myris, aes(x = Sepal.Length)) + geom_histogram() + 
-  facet_grid(Species ~ .)
-dev.off()
-
-?Devices
-```
-
-### Faceting
-
-```{r}
-
-ggplot(myris, aes(x = Sepal.Length)) + geom_histogram() + 
-  facet_wrap(~ Species)
-
-ggplot(myris, aes(x = Sepal.Length)) + geom_histogram() + 
-  facet_grid(Species ~ .)
-
-ggplot(myris, aes(x = Sepal.Length)) + geom_histogram() + 
-  facet_grid(Species ~ .)
-
-```
 

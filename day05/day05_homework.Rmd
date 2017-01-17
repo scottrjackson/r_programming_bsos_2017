@@ -30,6 +30,14 @@ output: html_document
 
 ```
 
+
+
+
+
+
+
+# Graphing
+
 4. Pick a single numerical variable from your data.  Use `ggplot` to plot a histogram and a density plot (separately).
    - Try some different values for `binwidth` for the histogram.
    - Try some different values for `adjust` for the density plot.
@@ -63,7 +71,6 @@ output: html_document
 
 ```
    
-   
 8. Create a bar plot that gets means broken down by TWO grouping factors.  For example, if Factor A has levels "red" and "blue" and Factor B has levels "north" and "south", get the cell means of "red north", "red south", "blue north", and "blue south."  
    - Use the dplyr methods to get these means into a data frame format.
    - Use the "bar" geom, but map the two variables to different graphical dimension.  One should be the "x" value, but the other should be mapped to some other visual property.
@@ -71,7 +78,6 @@ output: html_document
 ```{r}
 
 ```
-
 
 9. Output all of the plots above (from problems 1-8) as a single PDF.
 

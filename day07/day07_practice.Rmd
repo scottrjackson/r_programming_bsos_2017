@@ -12,6 +12,9 @@ library(reshape2)
 library(tidyr)
 library(ggplot2)
 
+mytips <- tips
+summary(mytips)
+head(mytips)
 ```
 
 1. Create a simple scatterplot, plotting the tip amount by the total bill.
@@ -20,7 +23,15 @@ library(ggplot2)
   - change the axis labels for both x and y
   - try two different methods
 ```{r}
+scatter1 <- ggplot(mytips, aes(x = total_bill, y = tip)) + geom_point()
+scatter1
 
+scatter1 + xlab("total bill amount") + ylab("tip amount")
+scatter1 + scale_x_continuous(name = "total bill amount") + scale_y_continuous(name = "tip amount")
+
+# classic heteroskedacity
+scatter2 <- ggplot(mytips, aes(x = log(total_bill), y = log(tip))) + geom_point()
+scatter2 + xlab("log of total bill") + ylab("log of tip")
 ```
 
 2. Continue using the previous data
@@ -29,6 +40,10 @@ library(ggplot2)
   - finally, use `labels = dollar` (made available by the `scales` package) to format the axis numbers as dollars
 
 ```{r}
+scatter1 + scale_x_log10(name = "total bill amount") + scale_y_log10(name = "tip amount")
+scatter1 + scale_x_log10(name = "total bill amount", breaks = seq(0, 55, 5)) + scale_y_log10(name = "tip amount", breaks = seq(0, 10, 2))
+library(scales)
+scatter1 + scale_x_log10(name = "total bill amount", breaks = seq(0, 55, 5), labels = dollar) + scale_y_log10(name = "tip amount", breaks = seq(0, 10, 2), labels = dollar)
 
 ```
 
@@ -40,6 +55,20 @@ library(ggplot2)
   - finally, change the overall "theme" to either the "classic", "minimal", or "bw" theme
 
 ```{r}
+scatter.base <- ggplot(mytips, aes(x = total_bill, y = tip)) + scale_x_log10(name = "total bill amount", breaks = seq(0, 55, 5), labels = dollar) + scale_y_log10(name = "tip amount", breaks = seq(0, 10, 2), labels = dollar)
+scatter.base
+
+scatter.base + geom_point(aes(color = sex))
+scatter.base + geom_point(aes(color = sex)) + scale_color_brewer(palette = "Set1")
+scatter.base + geom_point(aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"))
+
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"))
+
+ggplot(mytips, aes(x = total_bill, y = tip, color = sex)) + scale_x_log10(name = "total bill amount", breaks = seq(0, 55, 5), labels = dollar) + scale_y_log10(name = "tip amount", breaks = seq(0, 10, 2), labels = dollar) + geom_point() + geom_smooth(method = "lm") 
+
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "loess", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"))
+
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "loess", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue")) + theme_classic()
 
 ```
 
@@ -51,6 +80,15 @@ library(ggplot2)
   - finally, put the legend back to the default position, but change the levels, such that Male is given as the first level
   
 ```{r}
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"), name = "Gender") + theme_minimal() + theme(legend.position = "top") # note that order matters: put the theme() after theme_minimal()
+
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"), name = "Gender") + theme_minimal() + theme(legend.position = "none")
+
+mytips$sex <- factor(mytips$sex, levels = c("Male", "Female"))
+
+# changing data does not "update" scatter.base automatically
+scatter.base <- ggplot(mytips, aes(x = total_bill, y = tip)) + scale_x_log10(name = "total bill amount", breaks = seq(0, 55, 5), labels = dollar) + scale_y_log10(name = "tip amount", breaks = seq(0, 10, 2), labels = dollar)
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"), name = "Gender") + theme_minimal()
 
 ```
 
@@ -60,6 +98,23 @@ library(ggplot2)
   - make a change so that the labels on the top of the facets give the full day name (e.g., "Friday", not "Fri"), and they are ordered from Thursday to Sunday
   
 ```{r}
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"), name = "Gender") + theme_minimal() + facet_wrap(~ day)
+
+mytips$day <- factor(mytips$day, levels = c("Thur", "Fri", "Sat", "Sun"))
+levels(mytips$day) <- c("Thursday", "Friday", "Saturday", "Sunday")
+
+scatter.base <- ggplot(mytips, aes(x = total_bill, y = tip)) + scale_x_log10(name = "total bill amount", breaks = seq(0, 55, 5), labels = dollar) + scale_y_log10(name = "tip amount", breaks = seq(0, 10, 2), labels = dollar)
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"), name = "Gender") + theme_minimal() + facet_wrap(~ day)
+
+# "free" scales
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"), name = "Gender") + theme_minimal() + facet_wrap(~ day, scales = "free_x")
+
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"), name = "Gender") + theme_minimal() + facet_wrap(~ day, scales = "free_y")
+
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"), name = "Gender") + theme_minimal() + facet_wrap(~ day, scales = "free")
+
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"), name = "Gender") + theme_minimal() + facet_grid(. ~ day)
+scatter.base + geom_point(aes(color = sex)) + geom_smooth(method = "lm", aes(color = sex)) + scale_color_manual(values = c("magenta", "blue"), name = "Gender") + theme_minimal() + facet_grid(day ~ .)
 
 
 ```
@@ -71,6 +126,9 @@ library(ggplot2)
   - now add back the regression lines, but only plot a single regression line (i.e., not broken down by gender), remove the confidence interval (hint: look at the arguments for `geom_smooth()`), and make the line a dashed black line
   
 ```{r}
+scatter.base + geom_point(aes(color = sex, size = size)) + scale_color_brewer(palette = "Set1", name = "Gender") + theme_minimal() + facet_wrap(~ day)
+
+scatter.base + geom_point(aes(color = sex, size = size)) + geom_smooth(method = "lm", se = FALSE, color = "black", linetype = 2) + scale_color_brewer(palette = "Set1", name = "Gender") + theme_minimal() + facet_wrap(~ day)
 
 ```
 

@@ -6,6 +6,16 @@ output: html_document
 1. Write an if...else statement to test whether a string matches "right", and if so, print "you win!", but if the string matches "wrong", print "you lose!", and if it's neither, print "the result is inconclusive".
 
 ```{r}
+x <- "Right"
+if(x %in% c("right", "Right", "RIGHT")) {
+  print("you win!")
+} else if(x %in% "wrong") {
+  print("you lose!")
+} else {
+  print("the result is inconclusive")
+}
+
+
 
 ```
 
@@ -16,7 +26,20 @@ output: html_document
   - make a plot in ggplot2 to confirm that you did this right
   
 ```{r}
+myris <- iris
+library(ggplot2)
+myris$factor <- ifelse(myris$Sepal.Length < 5, "low", ifelse(myris$Sepal.Length > 6, "high", "mid"))
 
+myris$factor <- ifelse(myris$Sepal.Length < 5, "low", ifelse(myris$Sepal.Length >= 5 & myris$Sepal.Length <= 6, "mid", "high"))
+
+myris$factor <- ifelse(myris$Sepal.Length < 5, "low", ifelse(myris$Sepal.Length > 5 & myris$Sepal.Length < 6, "mid", ifelse(myris$Sepal.Length > 6, "high", NA))) %>% factor(levels = c("low", "mid", "high"))
+summary(myris)
+
+xtabs(~ Sepal.Length + factor, myris)
+
+ggplot(myris, aes(factor, Sepal.Length)) + geom_point()
+ggplot(myris, aes(factor, Sepal.Length)) + geom_boxplot()
+ggplot(myris, aes(Sepal.Length)) + geom_histogram(aes(fill = factor))
 ```
 
 3. Consider the iris data again.
@@ -28,6 +51,16 @@ output: html_document
     - use pdf() and dev.off() so that the three plots get written out to a file
     
 ```{r}
+myris <- iris
+ggplot(myris, aes(Sepal.Width, Sepal.Length)) + geom_point() + facet_wrap(~ Species)
+
+pdf("plots_from_loop.pdf")
+#for(species in c("setosa", "virginica", "versicolor")) {
+#for(species in unique(myris$Species)) {
+for(species in levels(myris$Species)) {
+  print(ggplot(myris[myris$Species == species, ], aes(Sepal.Width, Sepal.Length)) + geom_point() + labs(title = species))
+}
+dev.off()
 
 ```
 
@@ -37,6 +70,32 @@ output: html_document
   - compare the power of the t-test vs. the power of the Wilcoxon test
   
 ```{r}
+# set up the parameters of the simulation
+n.sim <- 10000
+sample.n <- 100
+mean.difference <- .3
+sd.x <- 1
+sd.y <- 1
+
+results <- data.frame(iteration = 1:n.sim, p.ttest = NA, p.wilcox = NA)
+
+for(counter in 1:n.sim) {
+  this.x <- rnorm(sample.n, mean = 0, sd = sd.x)
+  this.y <- rnorm(sample.n, mean = mean.difference, sd = sd.y)
+  this.ttest <- t.test(this.x, this.y)
+  this.wilcox <- wilcox.test(this.x, this.y)
+  results[counter, "p.ttest"] <- this.ttest$p.value
+  results[counter, "p.wilcox"] <- this.wilcox$p.value
+  if(counter %% 500 == 0) {
+    print(paste("finished simulation #", counter))
+  }
+}
+head(results)
+results$ttestsig <- ifelse(results$p.ttest < .05, TRUE, FALSE)
+results$wilcoxsig <- ifelse(results$p.wilcox < .05, TRUE, FALSE)
+head(results)
+sum(results$ttestsig)/nrow(results)
+sum(results$wilcoxsig)/nrow(results)
 
 ```
 

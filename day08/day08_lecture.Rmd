@@ -17,22 +17,22 @@ output: html_document
 
 # if/else
   - form: if(LOGICAL TEST) { CODE BLOCK if TEST == TRUE  }
-  -       else(OPTIONAL ADDITIONAL TEST { CODE BLOCK if TRUE }   <-- "else" code only tested if initial "if" fails
+  -       else if(OPTIONAL ADDITIONAL TEST) { CODE BLOCK if TRUE }   <-- "else" code only tested if initial "if" fails
 
 ```{r}
-x <- 0
+x <- 2
 if(x > 1){
   print(x)
 }
 
-x <- 3
+x <- 2
 if(x > 1) {
   print("you have enough!")
 } else {
   print("you need more!")
 }
 
-x <- 2
+x <- 3
 if(x > 3) {
   print("you have too many!")
 } else if(x < 3) {
@@ -41,10 +41,11 @@ if(x > 3) {
   print("just right!")
 }
 
-x <- c(1:10, rep(NA, 3))
+x <- c(1:10)
 if(anyNA(x)) {
   number.of.NAs <- sum(is.na(x))
-  print(paste("The mean (ignoring", number.of.NAs, "missing values) is", mean(x, na.rm = TRUE)))
+  print(paste("The mean (ignoring", number.of.NAs, 
+              "missing values) is", mean(x, na.rm = TRUE)))
 } else {
   print(paste("The mean is", mean(x)))
 }
@@ -55,9 +56,11 @@ if(anyNA(x)) {
     - arguments are: test = [LOGICAL TEST], yes = [VALUE if TEST == TRUE], no = [VALUE if TEST == FALSE]
 
 ```{r} 
-result <- ifelse(x > 3, "yay", "oh no!")
-
 x <- 4
+result <- ifelse(x > 3, "yay", "oh no!")
+result
+
+x <- 3
 result <- ifelse(x > 3, "yay", ifelse(x < 3, "oh no!", "well, okay"))
 result
 
@@ -99,32 +102,35 @@ for(this.name in c("Ally", "Bob", "Carol")) {
 
 # Won't work, because loop needs "my.answer" to exist
 rm(my.answer)
+my.answer <- vector()
 for(this.group in c(1, 2, 3)) {
-  this.vector <-  mydf[mydf$group == this.group, "x"]
+  this.vector <-  mydf$x[mydf$group == this.group]
   my.answer[this.group] <- mean(this.vector)  # subset of my.answer not available because my.answer doesn't exist
 }
+my.answer
 
 # Will work, but may get very slow
 my.answer <- NA
+system.time(
 for(this.group in 1:1000) {
   this.vector <-  mydf[mydf$group == this.group, "x"]
   my.answer[this.group] <- mean(this.vector)
-}
-
-# system.time()
+})
+length(my.answer)
 
 # BEST PRACTICE: pre-create the "results" object, with the proper size,
 #                to be "filled in" by the loop
-my.answer <- rep(NA, 1000)
-
 my.groups <- 1:1000
 
 my.answer <- vector(length = length(my.groups))
-for(this.counter in 1:length(my.groups)) {
+
+system.time(for(this.counter in 1:length(my.groups)) {
   this.group <- my.groups[this.counter]
   this.vector <- mydf[mydf$group == this.group, "x"]
   my.answer[this.counter] <- mean(this.vector)
-}
+})
+length(my.answer)
+mean(my.answer)
 
 ```
 
@@ -151,7 +157,7 @@ library(MASS)
 
 cor.table <- matrix(c(1, .2, .2, 1), nrow = 2)
 cor.table
-some.data <- mvrnorm(n = 10, mu = c(1, 2), Sigma = cor.table, empirical = TRUE)
+some.data <- mvrnorm(n = 10, mu = c(1, 2), Sigma = cor.table, empirical = FALSE)
 some.data
 cor(some.data[, 1], some.data[, 2])
 as.data.frame(some.data)
@@ -161,14 +167,30 @@ as.data.frame(some.data)
 
 ```{r}
 mu.sigmas <- data.frame(mean1 = c(0, 0.1, -0.1, -0.3, 0.25), mean2 = c(0.2, 0.0, 0.3, -0.15, -0.1), corr = c(.2, .4, .1, .35, -0.3))
+mu.sigmas
 
 data.sets <- list()
 length(data.sets) <- 5
 for(i in 1:5) {
-  data.sets[[i]] <- data.frame(mvrnorm(n = 1000, mu = c(mu.sigmas[i, "mean1"], mu.sigmas[i, "mean2"]), Sigma = matrix(c(1, mu.sigmas[i, "corr"], mu.sigmas[i, "corr"], 1), ncol = 2)))
+  data.sets[[i]] <- as.data.frame(mvrnorm(n = 1000, mu = c(mu.sigmas[i, "mean1"], mu.sigmas[i, "mean2"]), Sigma = matrix(c(1, mu.sigmas[i, "corr"], mu.sigmas[i, "corr"], 1), ncol = 2)))
   data.sets[[i]]$set <- i
   write.csv(data.sets[[i]], file = paste("sampledata", i, ".csv", sep = ""), row.names = FALSE)
 }
+
+str(data.sets)
+library(dplyr)
+all.data.sets <- bind_rows(data.sets, .id = "setID")
+xtabs(~ set + setID, all.data.sets)
+
+a1 <- 1
+a2 <- 55
+a3 <- 43
+a4 <- 1001
+
+for(this.var in paste("a", 1:4, sep = "")) {
+  print(get(this.var) * 2)
+}
+
 
 ```
 
@@ -188,13 +210,56 @@ for(counter in 1:n.sim) {
   this.data <- as.data.frame(mvrnorm(sample.n, mu = c(0, 0), Sigma = cortable))
   this.cortest <- cor.test(this.data$V1, this.data$V2)
   results[counter, "p"] <- this.cortest$p.value
-  if(counter %% 100 == 0) {
+  if(counter %% 500 == 0) {
     print(paste("finished simulation #", counter))
   }
 }
+head(results)
 results$sig <- ifelse(results$p < .05, TRUE, FALSE)
 head(results)
 sum(results$sig)/nrow(results)
+
+
+
+# set up the parameters of the simulation
+n.sim <- 10000
+sample.ns <- 100:200
+correlation <- .2
+
+power.analysis.results <- data.frame(sample.size = sample.ns, power = NA)
+
+for(this.sample in sample.ns) {
+  cortable <- matrix(c(1, correlation, correlation, 1), ncol = 2)
+  # "pre-allocate" the results table
+  results <- data.frame(iteration = 1:n.sim, p = NA)
+  
+  for(counter in 1:n.sim) {
+    this.data <- as.data.frame(mvrnorm(this.sample, mu = c(0, 0), Sigma = cortable))
+    this.cortest <- cor.test(this.data$V1, this.data$V2)
+    results[counter, "p"] <- this.cortest$p.value
+    if(counter %% 500 == 0) {
+      print(paste("finished simulation #", counter))
+    }
+  }
+  #head(results)
+  results$sig <- ifelse(results$p < .05, TRUE, FALSE)
+  #head(results)
+  power.analysis.results[power.analysis.results$sample.size == this.sample, "power"] <-   sum(results$sig)/nrow(results)
+
+}
+
+head(power.analysis.results)
+
+power.threshold <- .9
+
+min.sample <- min(power.analysis.results$sample.size[power.analysis.results$power >= power.threshold])
+ggplot(power.analysis.results, aes(sample.size, power)) + geom_line() + 
+  geom_smooth(se = FALSE, method = "loess") + 
+  geom_hline(yintercept = max(power.analysis.results$power), color = "red") +
+  annotate("text", x = min(power.analysis.results$sample.size) + (max(power.analysis.results$sample.size) - min(power.analysis.results$sample.size))/2, y = 1.02, label = paste("max power in these simulations:", max(power.analysis.results$power))) +
+  geom_hline(yintercept = power.threshold, color = "red", linetype = 2) + 
+  annotate("text", x = min(power.analysis.results$sample.size) + (max(power.analysis.results$sample.size) - min(power.analysis.results$sample.size))/2, y = power.threshold + .02, label = paste("sample needed for", power.threshold, " power:", min.sample))
+    
 
 ```
 

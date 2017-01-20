@@ -3,6 +3,8 @@ title: "Day 9 Homework"
 output: html_document
 ---
 
+0. Tell me about something you want to either review, or something new to cover.
+
 1. Use the `apply()` function to get the mean of several numerical columns, row-wise.  For example, imagine that you have three columns of numbers, and that you want to get the mean value for each row across the columns.  Use `apply()` to get this result and put it into a new column of your data frame.
 
 ```{r}

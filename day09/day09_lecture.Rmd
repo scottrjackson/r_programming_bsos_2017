@@ -9,6 +9,35 @@ output: html_document
   - Vectorization
   - Writing functions (more)
 
+# Weird counters in loops
+
+```{r}
+for(counter in 1:10) {
+  print(counter)
+}
+
+counter <- iris$Sepal.Length
+
+for(counter in list(iris$Sepal.Length, iris$Sepal.Width, iris$Petal.Length, iris$Petal.Width)) {
+#  print(counter)
+  
+  print(mean(counter))
+}
+
+for(column.name in colnames(iris)[1:4]) {
+  print(mean(iris[, column.name]))
+}
+
+for(counter in 1:1000) { # pretend that counter == 843 is bad, we want to skip it
+  if(counter %in% c(843)) {
+    
+  } else {
+    # whole code block here 
+  }
+}
+
+```
+
 # "Debugging" tips for for-loops
 
   - if you get an error, the counter variable is at the value when things broke
@@ -47,26 +76,13 @@ double.max <- function(arg1) {
   output
 }
 
-# remember that R can look "up" into environments
-arg1 <- 40:45
+double.max(3)
 
-bad.double.max <- function(x) { # not a good idea
-  output <- max(arg1) * 2  
-  output
-}
+double.max(1:10)
 
-bad.double.max(y)
+double.max(c(3, 24, 8))
 
-double.max <- function(x) {
-  max(x) * 2  # fine, because it's a value
-}
-
-bad.double.max2 <- function(x) {
-  output <- max(x) * 2  # not returning a value
-}
-
-#double.max <- function(x) { max(x) * 2 }
-#double.max <- function(x) max(x) * 2 
+objects()
 ```
 
 # Vectorization overview
@@ -94,12 +110,13 @@ x * 3
 minpair <- read.csv("scottdata/CognitionPaperFinalData.csv")
 head(minpair)
 colnames(minpair)
-
-minpair$allmean <- apply(minpair[, 10:17], MARGIN = 1, FUN = mean)
+head(minpair[, 10:17])
+minpair$allmean <- apply(minpair[, 10:17], MARGIN = 1, FUN = mean, na.rm = TRUE)
 head(minpair)
 
 double.max(1:10)
 
+mysleep.wide
 mysleep.wide$newcol <- apply(mysleep.wide[, 2:3], 1, double.max)
 mysleep.wide
 
@@ -107,18 +124,21 @@ mysleep.wide
 mysleep.wide$newcol2 <- apply(mysleep.wide[, 2:3], 1, function(x) { max(x) * 2 })
 mysleep.wide
 
-mysleep.wide$gains <- apply(mysleep.wide[, 2:3], 1, function(x) { x[2] - x[1] })
+mysleep.wide$gains <- apply(mysleep.wide[, 2:3], 1, function(anything) { anything[2] - anything[1] })
 mysleep.wide
+
+apply(mysleep.wide[, 2:3], 2, function(anything) { anything[2] - anything[1] })
 
 mysleep.wide$gains.weird <- apply(mysleep.wide[, 2:3], 1, function(y, z) { y[2] - z[1] })
 mysleep.wide
 
-z <- 2
-mysleep.wide$gains.weird <- apply(mysleep.wide[, 2:3], 1, function(y, z) { y[2] - z[1] }, z = z)
+my.z <- 2
+mysleep.wide$gains.weird <- apply(mysleep.wide[, 2:3], 1, function(y, z) { y[2] - z }, z = 2)
 mysleep.wide
 
 mysleep.wide$post[c(3, 5, 7)] <- NA
 
+mysleep.wide
 apply(mysleep.wide[, 2:3], 1, mean, na.rm = TRUE)
 
 # dplyr
@@ -128,15 +148,19 @@ mysleep.wide <-
   mutate(newcol3 = double.max(c(pre, post))) # or newcol3 = max(pre, post) * 2
 mysleep.wide
 
+# sidebar on mutate
+mysleep$new <- mysleep$extra * 3
+head(mysleep)
+double.max(mysleep.wide$pre)
+
 mysleep.wide <- mutate(mysleep.wide, newcol3 = double.max(c(pre, post)))
 
 # dplyr with reshaping
 mysleep.wide %>%
-  gather(condition, extra.sleep, 2:3) %>%
+  gather(condition, extra.sleep, pre:post) %>%
   group_by(ID) %>%
   mutate(newcol4 = double.max(extra.sleep)) %>%
   spread(condition, extra.sleep)
-
 
 ```
 
@@ -196,9 +220,20 @@ results <- ddply(mydata, c("factor1", "factor1"), my.function)
   - `summarize` = boil things down to some kind of summary
   - `do` = general purpose!
 
+### reviewing `summarize()`
+
+```{r}
+mysleep <- sleep
+mysleep.means <- group_by(mysleep, group) %>% summarize(mean = mean(extra), sd = sd(extra))
+mysleep.means
+summarize(mysleep, mean = mean(extra), sd = sd(extra))
+
+```
+
 ### example of `do()`
   
 ```{r}
+
 # generate some mock data
 for(counter in 1:5) {
   some.data <- data.frame(conditionA = rnorm(20, mean = 0), 
@@ -230,14 +265,7 @@ for(counter in 1:N) {
 my.ttest.results
 
 get.ttest.results <- function(data, var1, var2) {
-  this.ttest <- t.test(data[[var1]], data[[var2]])
-  this.mean1 <- this.ttest$estimate[1]
-  this.mean2 <- this.ttest$estimate[2]
-  this.t <- this.ttest$statistic
-  this.df <- this.ttest$parameter
-  this.pval <- this.ttest$p.value
-  my.ttest.results <- data.frame(this.mean1, this.mean2, this.t, this.df, this.pval)
-  my.ttest.results
+  return(my.ttest.results)
 }
 
 my.ttest.results.agg <- get.ttest.results(mydata, "conditionA", "conditionB")
@@ -252,6 +280,47 @@ mysleep.wide2$group <- rep(c(1, 2), each = 5)
 group_by(mysleep.wide2, group) %>% do(get.ttest.results(., "pre", "post"))
 
 ```
+
+# Retrospective construction of the function
+
+```{r eval = FALSE}
+# start with the results I want
+my.ttest.results <- data.frame(mean1 = this.mean1, mean2 = this.mean2, t = this.t, df = this.df, p = this.pval)
+
+# how do I get those?
+this.mean1 <- this.ttest$estimate[1]
+this.mean2 <- this.ttest$estimate[2]
+this.t <- this.ttest$statistic
+this.df <- this.ttest$parameter
+this.pval <- this.ttest$p.value
+
+# where do I get the t-test?
+this.ttest <- t.test(data[[var1]], data[[var2]])
+
+# example: get it to run ONCE
+this.ttest <- t.test(mydata$conditionA, mydata$conditionB)
+this.mean1 <- this.ttest$estimate[1]
+this.mean2 <- this.ttest$estimate[2]
+this.t <- this.ttest$statistic
+this.df <- this.ttest$parameter
+this.pval <- this.ttest$p.value
+my.ttest.results <- data.frame(mean1 = this.mean1, mean2 = this.mean2, t = this.t, df = this.df, p = this.pval)
+
+my.ttest.results
+
+# functionizing: make things abstract, pull out constants
+# new.function <- function(v1, v2) {
+# 
+# ...
+
+# new.function <- function(data) {
+#  this.ttest <- t.test(data$conditionA, data$conditionB)
+  
+final.version <- function(data, vars) {
+  this.ttest <- t.test(data[[vars[1]]], data[[vars[2]]])
+  
+```
+
 
 # More examples
 
@@ -361,6 +430,30 @@ get(tests.I.want[3])(myris.wide$Width, myris.wide$Length)
   - the body of a function is an environment, nested under the environment where it is called
 
 ```{r}
+
+
+# remember that R can look "up" into environments
+arg1 <- 40:45
+
+bad.double.max <- function(x) { # not a good idea
+  output <- max(arg1) * 2  
+  output
+}
+
+bad.double.max(y)
+
+double.max <- function(x) {
+  max(x) * 2  # fine, because it's a value
+}
+
+bad.double.max2 <- function(x) {
+  output <- max(x) * 2  # not returning a value
+}
+
+#double.max <- function(x) { max(x) * 2 }
+#double.max <- function(x) max(x) * 2 
+
+
 double.max <- function(x) {
   output <- max(x) * 2  
   print(environment())
@@ -504,7 +597,6 @@ my.pvals.v2 <- function(data, DV, factor) {
 ```
 
 ### insert "print" statements
-
 
 ```{r}
 my.pvals.v2(mysleep3, DV = "time.sleep", factor = "condition")

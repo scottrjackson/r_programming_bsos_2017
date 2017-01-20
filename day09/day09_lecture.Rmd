@@ -1,0 +1,606 @@
+---
+title: "Day 9 Lecture"
+output: html_document
+---
+
+# Outline
+  - Review homework and loops
+  - Writing functions (basics)
+  - Vectorization
+  - Writing functions (more)
+
+# "Debugging" tips for for-loops
+
+  - if you get an error, the counter variable is at the value when things broke
+  - insert `print()` statements to check on things mid-loop
+  - manually set the counter variable value, step through the loop
+
+# Functions
+  - making a function
+  - anonymous functions
+  - environments
+  - making functions available
+  - debugging
+
+## Function basics
+  - basic syntax very simple!
+
+```{r eval = FALSE}
+my.function <- function(arg1, arg2, ...) {
+  #FUNCTION BODY  
+}
+
+```
+
+  
+```{r}
+library(reshape2)
+library(dplyr)
+library(tidyr)
+mysleep <- sleep
+levels(mysleep$group) <- c("pre", "post")
+mysleep.wide <- dcast(mysleep, ID ~ group, value.var = "extra")
+mysleep.wide
+
+double.max <- function(arg1) {
+  output <- max(arg1) * 2  
+  output
+}
+
+# remember that R can look "up" into environments
+arg1 <- 40:45
+
+bad.double.max <- function(x) { # not a good idea
+  output <- max(arg1) * 2  
+  output
+}
+
+bad.double.max(y)
+
+double.max <- function(x) {
+  max(x) * 2  # fine, because it's a value
+}
+
+bad.double.max2 <- function(x) {
+  output <- max(x) * 2  # not returning a value
+}
+
+#double.max <- function(x) { max(x) * 2 }
+#double.max <- function(x) max(x) * 2 
+```
+
+# Vectorization overview
+  - sometimes faster (not always)
+  - sometimes easier to think about (not always)
+  - split-apply-combine
+  - "anonymous" functions = "one-use" functions
+
+```{r}
+x <- 1:10
+
+x * 3
+```
+
+# The `apply` family
+
+## `apply`
+
+- good for "row-wise" operations over data frames (or column-wise)
+- give it only the columns/rows you want to operate on
+- the `MARGIN` argument says whether it's row-wise (=1) or column-wise (=2)
+- the `FUN` argument says what to do with each row/column-wise vector
+
+```{r}
+minpair <- read.csv("scottdata/CognitionPaperFinalData.csv")
+head(minpair)
+colnames(minpair)
+
+minpair$allmean <- apply(minpair[, 10:17], MARGIN = 1, FUN = mean)
+head(minpair)
+
+double.max(1:10)
+
+mysleep.wide$newcol <- apply(mysleep.wide[, 2:3], 1, double.max)
+mysleep.wide
+
+# anonymous
+mysleep.wide$newcol2 <- apply(mysleep.wide[, 2:3], 1, function(x) { max(x) * 2 })
+mysleep.wide
+
+mysleep.wide$gains <- apply(mysleep.wide[, 2:3], 1, function(x) { x[2] - x[1] })
+mysleep.wide
+
+mysleep.wide$gains.weird <- apply(mysleep.wide[, 2:3], 1, function(y, z) { y[2] - z[1] })
+mysleep.wide
+
+z <- 2
+mysleep.wide$gains.weird <- apply(mysleep.wide[, 2:3], 1, function(y, z) { y[2] - z[1] }, z = z)
+mysleep.wide
+
+mysleep.wide$post[c(3, 5, 7)] <- NA
+
+apply(mysleep.wide[, 2:3], 1, mean, na.rm = TRUE)
+
+# dplyr
+mysleep.wide <- 
+  mysleep.wide %>%
+  rowwise() %>%
+  mutate(newcol3 = double.max(c(pre, post))) # or newcol3 = max(pre, post) * 2
+mysleep.wide
+
+mysleep.wide <- mutate(mysleep.wide, newcol3 = double.max(c(pre, post)))
+
+# dplyr with reshaping
+mysleep.wide %>%
+  gather(condition, extra.sleep, 2:3) %>%
+  group_by(ID) %>%
+  mutate(newcol4 = double.max(extra.sleep)) %>%
+  spread(condition, extra.sleep)
+
+
+```
+
+## other members of the `apply` family
+  - generally avoid, if possible!
+
+### `lapply`
+  - "list" apply
+  - does something to each member of a list/vector
+  - returns a list
+
+### `tapply`
+  - "table" apply
+  - does something to data in "cells" by a combination of factors
+  - returns a table
+
+### `sapply`
+  - "simple" apply
+  - returns a vector
+  - usually what you want instead of `lapply`
+
+# More general solutions: `plyr` and `dplyr`
+  - best for data frames
+  
+## `plyr`
+  - the `plyr` package is older, slower, not under very active development
+  - instantiates a "split-apply-combine" philosophy
+  - handy paper here: http://www.jstatsoft.org/v40/i01
+  - series of related functions
+    - XYply, where X = "thing you give it" and Y = "thing it gives you back"
+    - `ldply()` = you give it a list, it gives you back a data frame
+    - `daply()` = you give it a data frame, it gives you back an array
+    - etc.
+
+```{r eval = FALSE}
+# library(plyr)
+my.function <- (chunk)
+
+results <- ddply(mydata, c("factor1", "factor1"), my.function)
+
+```
+
+## `dplyr`
+  - the most common usage for `plyr` is `ddply()` -- give it a data frame and get a data frame back
+  - the `dplyr` package takes this and runs with it
+  - DON'T library both packages in the same session (unless you really need to and know what you're doing)
+  - `dplyr` is implemented to be much faster
+  - `dplyr` has rapidly taken over from `plyr`
+  
+### `dplyr` usage
+  
+  - "verbs": `mutate`, `filter`, `select`, `summarise` (or `summarize`), `arrange`
+  - use `group_by()` to set the groups over which something (like `summarize` will apply)
+  - `mutate` = "transform"
+  - `filter` = "get some of the rows"
+  - `select` = "get some of the columns"
+  - `summarize` = boil things down to some kind of summary
+  - `do` = general purpose!
+
+### example of `do()`
+  
+```{r}
+# generate some mock data
+for(counter in 1:5) {
+  some.data <- data.frame(conditionA = rnorm(20, mean = 0), 
+                          conditionB = rnorm(20, mean = 1),
+                          set = counter)
+  write.csv(some.data, paste("sampledata", counter, ".csv", sep = ""), row.names = FALSE)
+}
+
+
+N <- 5
+mydataframes <- list(length = N)
+for(set.num in 1:N) {
+  mydataframes[[set.num]] <- read.csv(paste("sampledata", set.num, ".csv", sep = ""))
+}
+
+mydata <- bind_rows(mydataframes)  
+summary(mydata)
+
+my.ttest.results <- data.frame(mean1 = rep(NA, 5), mean2 = NA, t = NA, df = NA, p = NA)
+for(counter in 1:N) {
+  this.ttest <- t.test(mydata$conditionA[mydata$set == counter], mydata$conditionB[mydata$set == counter])
+  this.mean1 <- this.ttest$estimate[1]
+  this.mean2 <- this.ttest$estimate[2]
+  this.t <- this.ttest$statistic
+  this.df <- this.ttest$parameter
+  this.pval <- this.ttest$p.value
+  my.ttest.results[counter, ] <- c(this.mean1, this.mean2, this.t, this.df, this.pval)
+}
+my.ttest.results
+
+get.ttest.results <- function(data, var1, var2) {
+  this.ttest <- t.test(data[[var1]], data[[var2]])
+  this.mean1 <- this.ttest$estimate[1]
+  this.mean2 <- this.ttest$estimate[2]
+  this.t <- this.ttest$statistic
+  this.df <- this.ttest$parameter
+  this.pval <- this.ttest$p.value
+  my.ttest.results <- data.frame(this.mean1, this.mean2, this.t, this.df, this.pval)
+  my.ttest.results
+}
+
+my.ttest.results.agg <- get.ttest.results(mydata, "conditionA", "conditionB")
+my.ttest.results.agg
+
+my.ttest.results2 <- group_by(mydata, set) %>% do(get.ttest.results(., "conditionA", "conditionB"))
+my.ttest.results2
+
+mysleep.wide2 <- mysleep.wide[, 1:3]
+mysleep.wide2$group <- rep(c(1, 2), each = 5)
+
+group_by(mysleep.wide2, group) %>% do(get.ttest.results(., "pre", "post"))
+
+```
+
+# More examples
+
+```{r}
+myris <- iris
+myris$plant <- 1:nrow(myris)
+myris <- gather(myris, myvariable, cm, 1:4)
+myris <- separate(myris, myvariable, c("part", "dimension"), sep = "\\.")
+myris$part <- as.factor(myris$part)
+myris$dimension <- as.factor(myris$dimension)
+
+# why not make this a function, dummy?
+clean.iris <- function(iris = iris) {
+  library(tidyr)
+  myris <- iris
+  myris$plant <- 1:nrow(myris)
+  myris <- gather(myris, myvariable, cm, 1:4)
+  myris <- separate(myris, myvariable, c("part", "dimension"), sep = "\\.")
+  myris$part <- as.factor(myris$part)
+  myris$dimension <- as.factor(myris$dimension)
+  myris
+}
+
+myris2 <- clean.iris(iris)
+
+myris.wide <- spread(myris2, dimension, cm)
+head(myris.wide)
+
+lm.myris <- lm(Length ~ Width, data = myris.wide)
+summary(lm.myris)
+
+lm.results1 <- data.frame(expand.grid(levels(myris.wide$Species), levels(myris.wide$part)))
+lm.results1$est <- NA
+lm.results1$r.squared <- NA
+lm.results1
+
+est <- summary(lm.myris)$coefficients["Width", "Estimate"]
+r.squared <- summary(lm.myris)$r.squared
+
+species <- levels(myris.wide$Species)
+parts <- levels(myris.wide$part)
+for(this.species in species) {
+
+  for(this.part in parts) {
+  
+    print(paste(this.part,this.species))
+    
+    this.lm <- lm(Length ~ Width, data = myris.wide[myris.wide$Species == this.species & myris.wide$part == this.part, ])
+    this.est <- summary(this.lm)$coefficients["Width", "Estimate"]
+    this.r.squared <- summary(this.lm)$r.squared
+    lm.results1[lm.results1$Var1 == this.species & lm.results1$Var2 == this.part, 3:4] <- c(this.est, this.r.squared)
+    
+  }
+
+}
+lm.results1
+
+# dplyr version
+
+lw.lm.results <- function(this.data) {
+  this.lm <- lm(Length ~ Width, data = this.data)
+  this.est <- summary(this.lm)$coefficients["Width", "Estimate"]
+  this.r.squared <- summary(this.lm)$r.squared
+  results <- data.frame(est = this.est, r.squared = this.r.squared)
+  results
+}
+
+group_by(myris.wide, Species, part) %>% do(lw.lm.results(.))
+
+better.lm.results <- function(this.data, x, y) {
+  this.formula <- as.formula(paste(y, "~", x))
+  this.lm <- lm(this.formula, data = this.data)
+  this.est <- summary(this.lm)$coefficients[x, "Estimate"]
+  this.r.squared <- summary(this.lm)$r.squared
+  results <- data.frame(est = this.est, r.squared = this.r.squared)
+  results
+}
+
+group_by(myris.wide, Species, part) %>% do(better.lm.results(., "Width", "Length"))
+
+myris.renamed <- myris.wide
+colnames(myris.renamed) <- c("species", "flower", "part", "height", "weight")
+
+group_by(myris.renamed, species, part) %>% do(better.lm.results(., "height", "weight"))
+
+# get() function
+x <- 1:10
+"x"
+x
+get("x")
+
+t.test(myris.wide$Width, myris.wide$Length)
+
+get("t.test")(myris.wide$Width, myris.wide$Length)
+
+tests.I.want <- c("t.test", "cor.test", "wilcox.test")
+
+get(tests.I.want[3])(myris.wide$Width, myris.wide$Length)
+
+```
+
+
+# More stuff on functions
+
+## Environments
+  - R can look "up" through environments, but not "down"
+  - the body of a function is an environment, nested under the environment where it is called
+
+```{r}
+double.max <- function(x) {
+  output <- max(x) * 2  
+  print(environment())
+  print(objects())
+  cat("\nThis is an awesome function\n")
+  print(output)
+  return(NULL)
+}
+
+x <- double.max(1:10)
+x
+
+double.max <- function(x) {
+  output <- max(x) * 2
+  y <- 6
+  output
+}
+
+y
+
+evil.double.max <- function(x) {
+  output <- max(x) * 2
+  y <<- 6
+  output
+}
+
+rm(y)
+set.seed(42)
+x <- evil.double.max(rnorm(20))
+x
+y
+
+```
+
+
+## Making functions available
+  - in the notebook/script
+  - `source()`
+    - runs all code in another file
+
+```{r}
+# source("day9/anotherfunction.R")
+```
+
+  - package!
+    - some package-making tutorials:
+      - http://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/
+      - http://r-pkgs.had.co.nz/
+      - https://support.rstudio.com/hc/en-us/articles/200486488-Developing-Packages-with-RStudio
+      - http://cran.r-project.org/doc/contrib/Leisch-CreatingPackages.pdf
+      - and lots more
+
+## Debugging
+  - run as a non-function
+  - insert "test" code
+  - use `browser()`, `debug()`, and `undebug()`
+  
+```{r}
+my.analysis <- function() {
+  library(dplyr)
+  if(require(mice)) {
+    print("run mice code")
+  } else {
+    print("run some alternative code")
+  }   
+}
+
+my.analysis2 <- function() {
+  library(dplyr)
+  if(library(mice)) {  # throws an error
+    print("run mice code")
+  } else {
+    print("run some alternative code")
+  }   
+}
+
+
+mysleep <- sleep
+
+my.pvals.v1 <- function(data) {
+  test.results <- t.test(extra ~ group, data = data, paired = TRUE)
+  pval <- test.results$p.value
+  if (pval < .05) {
+    output <- "p < .05, significant, thank god"
+  } else {
+    output <- paste("dammit, p is =", round(pval, 3))
+  }
+  output
+}
+
+my.pvals.v1(mysleep)
+mysleep2 <- mysleep[-c(3, 17), ]
+my.pvals.v1(mysleep2)
+mysleep3 <- mysleep
+colnames(mysleep3) <- c("time.sleep", "condition", "subject")
+my.pvals.v1(mysleep3)
+```
+
+```{r eval=FALSE}
+my.pvals.v2 <- function(data, DV, factor) {
+  test.results <- t.test(DV ~ factor, data = data, paired = paired)
+  pval <- test.results$p.value
+  if (pval < .05) {
+    output <- "p < .05, significant, thank god"
+  } else {
+    output <- paste("dammit, p is =", round(pval, 3))
+  }
+  output
+}
+
+my.pvals.v2(mysleep3, DV = "time.sleep", factor = "condition") # this will break!
+
+```
+
+### "fake function" debugging
+
+```{r}
+my.pvals.v2(mysleep3, DV = "time.sleep", factor = "condition")
+
+my.pvals.v2 <- function(data, DV, factor) {
+  
+  data <- mysleep3
+  DV <- "time.sleep"
+  factor <- "condition"
+  
+  test.results <- t.test(DV ~ factor, data = data)
+  pval <- test.results$p.value
+  if (pval < .05) {
+    output <- "p < .05, significant, thank god"
+  } else {
+    output <- paste("dammit, p is =", round(pval, 3))
+  }
+  output
+  
+  
+  
+}
+
+
+
+```
+
+### insert "print" statements
+
+
+```{r}
+my.pvals.v2(mysleep3, DV = "time.sleep", factor = "condition")
+
+my.pvals.v2 <- function(data, DV, factor) {
+  print(DV)
+  test.results <- t.test(DV ~ factor, data = data)
+  pval <- test.results$p.value
+  if (pval < .05) {
+    output <- "p < .05, significant, thank god"
+  } else {
+    output <- paste("dammit, p is =", round(pval, 3))
+  }
+  output
+  
+  
+  
+}
+
+
+```
+
+### with debugging utilities
+  - `browser()`
+  - `debug()`, `undebug()`
+
+```{r}
+my.pvals.v2(mysleep3, DV = "time.sleep", factor = "condition")
+
+my.pvals.v2 <- function(data, DV, factor) {
+  #browser()
+  test.results <- t.test(DV ~ factor, data = data)
+  pval <- test.results$p.value
+  if (pval < .05) {
+    output <- "p < .05, significant, thank god"
+  } else {
+    output <- paste("dammit, p is =", round(pval, 3))
+  }
+  output  
+}
+
+debug(my.pvals.v2)
+undebug(my.pvals.v2)
+
+my.pvals.v3 <- function(data, my.formula) {
+  #browser()
+  test.results <- t.test(my.formula, data = data)
+  pval <- test.results$p.value
+  if (pval < .05) {
+    output <- "p < .05, significant, thank god"
+  } else {
+    output <- paste("dammit, p is =", round(pval, 3))
+  }
+  output  
+}
+
+my.pvals.v3(mysleep3, time.sleep ~ condition)
+
+my.pvals.v4 <- function(data, DV, factor) {
+  formula.string <- paste(DV, "~", factor)
+  my.formula <- as.formula(formula.string)
+  test.results <- t.test(my.formula, data = data)
+  pval <- test.results$p.value
+  if (pval < .05) {
+    output <- "p < .05, significant, thank god"
+  } else {
+    output <- paste("dammit, p is =", round(pval, 3))
+  }
+  output  
+}
+
+my.pvals.v4(mysleep3, DV = "time.sleep", factor = "condition")
+
+
+```
+
+### dealing with user error
+
+``` {r}
+my.pvals.v4 <- function(data, DV, factor) {
+  if(!is.data.frame(data)) {
+    stop("Please supply a data frame, dear user") # can use warning() as well, does not throw error
+  }
+  formula.string <- paste(DV, "~", factor)
+  my.formula <- as.formula(formula.string)
+  test.results <- t.test(my.formula, data = data)
+  pval <- test.results$p.value
+  if (pval < .05) {
+    output <- "p < .05, significant, thank god"
+  } else {
+    output <- paste("dammit, p is =", round(pval, 3))
+  }
+  output  
+}
+
+my.pvals.v4(as.matrix(mysleep3), DV = "time.sleep", factor = "condition")
+
+
+```

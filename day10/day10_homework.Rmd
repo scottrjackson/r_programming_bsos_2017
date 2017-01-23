@@ -1,0 +1,26 @@
+---
+title: "Day 10 Homework"
+output: html_document
+---
+
+Thanks for a great class!  I appreciate everyone's participation, willingness to ask questions, and willingness to share when things were going wrong.  I'd love to keep doing this class, and hopefully improve on it.  Here are a few questions that I have about how things went.  If you have other feedback, I'd love to hear that, too.
+
+THIS HOMEWORK IS DUE SOMETIME AFTER WEDNESDAY, JANUARY 25.  This is after I will have turned in the grades, so you automatically have "credit" for the homework, and I want you to feel free to be brutally honest.
+
+1. What do you feel was the most useful topic covered in the class?
+
+2. What was the most difficult/confusing topic in the class?
+
+3. What topics were not covered (or were not covered sufficiently), that you would have liked to have seen?
+
+4. Do you feel like the homework (including review and feedback) was an important part of your learning?
+
+5. Are there things about the homework that you would have liked changed, in order to be more helpful?
+
+6. How useful/distracting was the use of git and GitHub in the class?
+
+7. How useful/distracting was the use of R Markdown in the class?
+
+8. Any other thoughts/comments?
+
+Thanks!

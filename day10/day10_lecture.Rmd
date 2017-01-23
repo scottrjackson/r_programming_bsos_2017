@@ -1,0 +1,343 @@
+---
+title: "Day 10 lecture/review"
+output: html_document
+---
+
+# Template for working with new functions
+
+## Some steps
+  1. Find the function/package you want
+    - Google
+    - People you know
+    - TaskViews: http://lib.stat.cmu.edu/R/CRAN/
+    - Papers (contact authors if necessary)
+  2. If you find a package:
+    - Use the RStudio package "link"
+    - Look at the CRAN page
+      - Google: "CRAN <packagename>"
+      - website links (URL)
+      - vignettes
+  3. When you find a function
+    1. go to the help page (`?<functionname>`)
+    2. what are the required arguments?
+      - in Usage
+      - no defaults!
+    3. what kinds of things can go in the required arguments?
+      - type of object: look in Arguments
+      - format
+      - `example()`
+    4. try it!
+    5. inspect the structure of the resulting object
+    6. troubleshoot
+    
+## Example: factor analysis
+
+1. Google around: decide on `factanal()`
+2. Already in `stats` package
+3. `?factanal`
+4. Required arguments:
+  - `x`
+  - `factors`
+  
+```{r}
+myris <- iris
+myris.fa1 <- factanal(x = ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = myris, factors = 1)
+myris.fa2 <- factanal(x = myris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")], factors = 1)
+
+myris.fa1 # same as print(myris.fa1)
+myris.fa2
+names(myris.fa1)
+str(myris.fa1)
+class(myris.fa1)
+
+# help() : Value
+```
+
+  - reminder: 
+    - ERRORS mean "I give up, there's a problem"
+    - WARNINGS mean "you might not want to do that (but I did it anyway)"
+  - inspect the structure of the resulting object
+    - `print()` (same as just typing name of object + Enter)
+    - `names()`
+    - `str()`
+    - look at the Value part of the help file
+  - browse through optional arguments
+
+
+# Template for loops (or vectorization)
+
+Example:
+  - We want a regression
+  - estimate, std err, p-value
+  - scatterplot with regression line
+  - for each species separately
+
+1. DO IT ONCE!
+  - do whatever you want to do, on just one chunk of your data (or whatever it is that you want to iterate through)
+
+```{r}
+library(ggplot2)
+myris <- iris
+
+myris.subset <- myris[myris$Species == "setosa", ] # or filter(myris, Species == "setosa")
+
+myris.lm <- lm(Sepal.Width ~ Sepal.Length, data = myris.subset) 
+coefs <- summary(myris.lm)$coefficients
+est <- coefs["Sepal.Length", "Estimate"]
+std.error <- coefs["Sepal.Length", "Std. Error"]
+pval <- coefs["Sepal.Length", "Pr(>|t|)"]
+
+ggplot(myris.subset, aes(Sepal.Length, Sepal.Width)) + geom_point() + geom_smooth(method = "lm")
+
+```
+
+2. Figure out what MINIMALLY needs to change for each pass through a loop
+  - try a copy & paste, get it to work for the next thing
+  - the species
+  - THAT minimal thing is what you want the counter to loop through (or index)
+  
+```{r}
+myris <- iris
+
+myris.subset <- myris[myris$Species == "virginica", ] # or filter(myris, Species == "virginica")
+
+myris.lm <- lm(Sepal.Width ~ Sepal.Length, data = myris.subset) 
+coefs <- summary(myris.lm)$coefficients
+est <- coefs["Sepal.Length", "Estimate"]
+std.error <- coefs["Sepal.Length", "Std. Error"]
+pval <- coefs["Sepal.Length", "Pr(>|t|)"]
+
+ggplot(myris.subset, aes(Sepal.Length, Sepal.Width)) + geom_point() + geom_smooth(method = "lm")
+
+```
+
+3. Modify to fit the loop structure
+  - figure out how to get all the counter values in a vector
+  - `for(COUNTER in COUNTER.VECTOR) { }`
+  - set up "results storage" object
+    - list
+    - data.frame
+    - etc.
+  - how do I get the values produced in each loop?
+    
+```{r}
+#for(this.species in c("setosa", "virginica", "versicolor")) {
+#for(this.species in levels(myris$Species)) {
+#for(this.species in unique(myris$Species)) {
+#
+all.species <- levels(myris$Species)
+
+# storing results
+# my.results <- list(est = NA, std.errors = NA, pvals = NA, plots = NA)
+
+my.results <- data.frame(species = all.species, est = NA, std.err = NA, pval = NA)
+my.plots <- list()
+for(this.species in all.species) {
+  myris.subset <- myris[myris$Species == this.species, ]
+  myris.lm <- lm(Sepal.Width ~ Sepal.Length, data = myris.subset) 
+  coefs <- summary(myris.lm)$coefficients
+  
+  # the values we want
+  est <- coefs["Sepal.Length", "Estimate"]
+  std.error <- coefs["Sepal.Length", "Std. Error"]
+  pval <- coefs["Sepal.Length", "Pr(>|t|)"]
+  plot <- ggplot(myris.subset, aes(Sepal.Length, Sepal.Width)) + geom_point() + geom_smooth(method = "lm") + labs(title = this.species)
+  
+  # stick the values in our results object
+  my.results[my.results$species == this.species, c("est", "std.err", "pval")] <- c(est, std.error, pval)
+  my.plots[[this.species]] <- plot
+}
+
+#this.species <- "setosa"
+#  print(ggplot(myris.subset, aes(Sepal.Length, Sepal.Width)) + geom_point() + geom_smooth(method = "lm") + labs(title = this.species))
+
+# faceting: sometimes a good alternative to looping (with plots)
+
+ggplot(myris, aes(Sepal.Length, Sepal.Width)) + geom_point() + geom_smooth(method = "lm") + facet_wrap(~ Species)
+
+library(grid)
+library(gridExtra)
+grid.arrange(my.plots[[1]], my.plots[[2]], my.plots[[3]], ncol = 1) # good for arranging multiple plots in one window/page
+
+```
+
+NOTE: sometimes "indices" work better than "values"
+
+```{r}
+all.species <- levels(myris$Species)
+
+my.results <- data.frame(species = all.species, est = NA, std.err = NA, pval = NA)
+my.plots <- list()
+
+for(this.row in 1:length(all.species)) {
+  myris.subset <- myris[myris$Species == all.species[this.species], ]
+  myris.lm <- lm(Sepal.Width ~ Sepal.Length, data = myris.subset) 
+  coefs <- summary(myris.lm)$coefficients
+  
+  # the values we want
+  est <- coefs["Sepal.Length", "Estimate"]
+  std.error <- coefs["Sepal.Length", "Std. Error"]
+  pval <- coefs["Sepal.Length", "Pr(>|t|)"]
+  plot <- ggplot(myris.subset, aes(Sepal.Length, Sepal.Width)) + geom_point() + geom_smooth(method = "lm") + labs(title = all.species[this.species])
+  
+  # stick the values in our results object
+  my.results[this.row, c("est", "std.err", "pval")] <- c(est, std.error, pval)
+  my.plots[[this.row]] <- plot
+}
+
+my.results
+names(my.plots)
+str(my.plots)
+```
+
+4. When things break: 
+  - find out where it broke (if an Error)
+    - last value of counter == where it broke
+  - run in through single loops
+    - manually set counter variable
+
+## Vectorized version
+  - same overall process
+    1. DO IT ONCE
+    2. Instead of finding counter variable, find arguments
+
+```{r}
+
+get.results <- function(chunk, DV, IV) {
+  my.formula <- as.formula(paste(DV, "~", IV))
+  myris.lm <- lm(my.formula, data = chunk) 
+  coefs <- summary(myris.lm)$coefficients
+  
+  # the values we want
+  est <- coefs[IV, "Estimate"]
+  std.error <- coefs[IV, "Std. Error"]
+  pval <- coefs[IV, "Pr(>|t|)"]
+  plot <- ggplot(chunk, aes(get(IV), get(DV))) + geom_point() + geom_smooth(method = "lm") + labs(title = this.species)
+  
+  # stick the values in our results object
+  my.results <- data.frame(est = est, std.err = std.error, pval = pval)
+  #my.plots[[this.species]] <- plot
+  pdf("dplyr_plots.pdf")
+  print(plot)
+  dev.off()
+  
+  return(my.results)
+}
+
+library(dplyr)
+
+# with pipes
+all.results <- myris %>% group_by(Species) %>% do(get.results(chunk = ., DV = "Petal.Width", IV = "Petal.Length")) %>% as.data.frame()
+
+# without pipes
+all.results <- as.data.frame(do(.data = group_by(myris, Species), get.results(.)))
+
+get.results(myris)
+
+all.results
+
+random.thing <- function(cool.argument.name = 18) {
+  sqrt(length(cool.argument.name))
+}
+
+random.thing(1:10)
+random.thing()
+
+```
+
+- by-hand debugging
+
+```{r}
+IV <- "Petal.Width"
+DV <- "Petal.Length"
+chunk <- myris
+  plot <- ggplot(chunk, aes(get(IV), get(DV))) + geom_point() + geom_smooth(method = "lm") + labs(title = this.species)
+plot
+```
+
+# Debugging functions
+
+```{r}
+test.function <- function(chunk, DV, IV) {
+  my.formula <- as.formula(paste(DV, "~", IV))
+  myris.lm <- lm(my.formula, data = chunk) 
+  coefs <- summary(myris.lm)$coefficients
+  
+  # the values we want
+  est <- coefs[IV, "Estimate"]
+  std.err <- coefs[IV, "Std. Error"]
+  pval <- coefs[IV, "Pr(>|t|)"]
+  plot <- ggplot(chunk, aes(get(IV), get(DV))) + geom_point() + geom_smooth(method = "lm") + labs(title = this.species)
+  
+  # stick the values in our results object
+  my.results <- data.frame(est = est, std.err = std.err, pval = pval)
+
+  return(my.results)
+  
+}
+
+test.function(myris, "Sepal.Width", "Sepal.Length")
+
+debug(test.function)
+
+test.function(myris, "Sepal.Width", "Sepal.Length")
+
+# capital "Q" + Enter exits debugger (aka "browser")
+
+# can also insert browser()
+test.function2 <- function(chunk, DV, IV) {
+  my.formula <- as.formula(paste(DV, "~", IV))
+  myris.lm <- lm(my.formula, data = chunk) 
+  coefs <- summary(myris.lm)$coefficients
+  
+  # the values we want
+  est <- coefs[IV, "Estimate"]
+  std.err <- coefs[IV, "Std. Error"]
+  pval <- coefs[IV, "Pr(>|t|)"]
+  plot <- ggplot(chunk, aes(get(IV), get(DV))) + geom_point() + geom_smooth(method = "lm") + labs(title = this.species)
+  #if(this.species == "setosa") { # if you want to selectively browse
+    browser()
+  #}
+  # stick the values in our results object
+  my.results <- data.frame(est = est, std.err = std.err, pval = pval)
+  return(my.results)
+}
+
+test.function2(myris, "Sepal.Width", "Sepal.Length")
+
+```
+
+# Other issues
+
+## Missing data
+
+Best package for imputation:
+  - `mice`
+  - implements multiple imputation
+  
+# Error bars
+
+```{r}
+myris <- iris
+
+std.err <- function(x) { sd(x)/sqrt(length(x)) }
+
+myris.means <- myris %>% group_by(Species) %>% summarize(mean = mean(Sepal.Width), sd = sd(Sepal.Width), N = length(Sepal.Width), std.err = std.err(Sepal.Width))
+
+myris.means$std.err2 <- apply(myris.means[, c("sd", "N")], 1, function(row) row[1]/sqrt(row[2]))
+
+myris.means
+
+ggplot(myris.means, aes(Species, mean)) + geom_bar(stat = "identity", aes(fill = Species)) + geom_errorbar(aes(ymin = mean - 1.96*std.err, ymax = mean + 1.96*std.err), width = .3)
+
+ggplot(myris.means, aes(Species, mean)) + geom_pointrange(aes(ymin = mean - 1.96*std.err, ymax = mean + 1.96*std.err))
+
+ggplot(myris.means, aes(Species, mean)) + geom_point() + geom_errorbar(aes(ymin = mean - 1.96*std.err, ymax = mean + 1.96*std.err), width = .3)
+
+ggplot(myris.means, aes(Species, mean)) + geom_pointrange(aes(ymin = mean - 1.96*std.err, ymax = mean + 1.96*std.err)) + ylim(0, 4)
+
+ggplot(myris.means, aes(Species, mean)) + geom_pointrange(aes(ymin = mean - 1.96*std.err, ymax = mean + 1.96*std.err)) + scale_y_continuous(limits = c(0, 4))
+
+
+```
+
